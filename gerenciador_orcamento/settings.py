@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'orcamento',
 ]
 
 MIDDLEWARE = [
@@ -121,3 +122,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SHEET2API_URL = 'https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento'
