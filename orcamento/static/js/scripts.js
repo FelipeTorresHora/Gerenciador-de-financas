@@ -74,19 +74,62 @@ function updateChart() {
                 chart.destroy();
             }
 
-            new Chart(document.getElementById("budgetChart").getContext("2d"), {
-                type: "bar",
+            const ctx = document.getElementById("budgetChart").getContext("2d");
+            new Chart(ctx, {
+                type: "bar", // Tipo de gráfico
                 data: {
-                    labels: data.categories,
+                    labels: data.categories, // Categorias no eixo X
                     datasets: [
                         {
-                            label: "Gastos",
-                            data: data.values,
-                            backgroundColor: ["#ff6384", "#36a2eb", "#cc65fe"],
+                            label: "Gastos", // Legenda do dataset
+                            data: data.values, // Valores no eixo Y
+                            backgroundColor: ["#ff6384", "#36a2eb", "#cc65fe", "#ffce56", "#4bc0c0"], // Cores das barras
+                            borderColor: ["#ff6384", "#36a2eb", "#cc65fe", "#ffce56", "#4bc0c0"], // Cores das bordas
+                            borderWidth: 1, // Largura da borda
                         },
                     ],
                 },
+                options: {
+                    responsive: false, // Torna o gráfico responsivo
+                    maintainAspectRatio: false, // Permite que o gráfico redimensione livremente
+                    width: 600,
+                    height: 400,
+                    plugins: {
+                        legend: {
+                            display: true, // Exibe a legenda
+                            position: "top", // Posição da legenda
+                        },
+                        tooltip: {
+                            enabled: true, // Ativa tooltips
+                            callbacks: {
+                                label: function (context) {
+                                    return `Valor: ${context.raw.toLocaleString("pt-BR", {
+                                        style: "currency",
+                                        currency: "BRL",
+                                    })}`; // Formata o valor em Reais (BRL)
+                                },
+                            },
+                        },
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true, // Começa o eixo Y do zero
+                            ticks: {
+                                callback: function (value) {
+                                    return value.toLocaleString("pt-BR", {
+                                        style: "currency",
+                                        currency: "BRL",
+                                    }); // Formata os valores do eixo Y em Reais (BRL)
+                                },
+                            },
+                        },
+                    },
+                },
             });
+        })
+        .catch((error) => {
+            console.error("Erro ao atualizar gráfico:", error);
+            alert("Erro ao carregar dados do gráfico.");
         });
 }
 
@@ -100,3 +143,6 @@ addRowButton.addEventListener("click", addRow);
 tableBody.addEventListener("click", deleteRow);
 saveButton.addEventListener("click", saveTable);
 updateChartButton.addEventListener("click", updateChart);
+
+// Inicializar o gráfico ao carregar a página
+document.addEventListener("DOMContentLoaded", updateChart);
