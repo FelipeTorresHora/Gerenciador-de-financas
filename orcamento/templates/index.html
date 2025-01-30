@@ -1,208 +1,211 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard - Gerenciador de Orçamento</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            background-color: #1e1e1e;
-            color: #f8f9fa;
-        }
-        .sidebar {
-            height: 100vh;
-            width: 250px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background-color: #343a40;
-            padding-top: 20px;
-        }
-        .sidebar a {
-            padding: 10px 15px;
-            text-decoration: none;
-            font-size: 18px;
-            color: #f8f9fa;
-            display: block;
-        }
-        .sidebar a:hover {
-            background-color: #495057;
-        }
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
-        }
-        .chart-container {
-            background-color: #2d2d2d;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
+      body {
+        background-color: #1e1e1e;
+        color: #f8f9fa;
+      }
+      .sidebar {
+        height: 100vh;
+        width: 250px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: #343a40;
+        padding-top: 20px;
+      }
+      .sidebar a {
+        padding: 10px 15px;
+        text-decoration: none;
+        font-size: 18px;
+        color: #f8f9fa;
+        display: block;
+      }
+      .sidebar a:hover {
+        background-color: #495057;
+      }
+      .main-content {
+        margin-left: 250px;
+        padding: 20px;
+      }
+      .chart-container {
+        background-color: #2d2d2d;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <!-- Barra Lateral -->
     <div class="sidebar">
-        <a href="index.html">Dashboard</a>
-        <a href="{% url 'transacoes' %}">Transações</a>
+      <a href="{% url 'index' %}">Dashboard</a>
+      <a href="{% url 'transacoes' %}">Transações</a>
     </div>
 
     <!-- Conteúdo Principal -->
     <div class="main-content">
-        <h2>Estatísticas</h2>
-        <div class="form-inline mb-3">
-            <select id="filterMonth" class="form-control mr-2">
-                <option value="">Selecione o Mês</option>
-                <option value="1">Janeiro</option>
-                <option value="2">Fevereiro</option>
-                <option value="3">Março</option>
-                <option value="4">Abril</option>
-                <option value="5">Maio</option>
-                <option value="6">Junho</option>
-                <option value="7">Julho</option>
-                <option value="8">Agosto</option>
-                <option value="9">Setembro</option>
-                <option value="10">Outubro</option>
-                <option value="11">Novembro</option>
-                <option value="12">Dezembro</option>
-            </select>
-            <select id="filterYear" class="form-control mr-2">
-                <option value="">Selecione o Ano</option>
-            </select>
-            <select id="chartType" class="form-control mr-2">
-                <option value="daily">Diário</option>
-                <option value="categories">Categorias</option>
-                <option value="monthly_total">Total Mensal</option>
-            </select>
-            <button class="btn btn-primary" id="updateChart">Atualizar</button>
+      <h2>Estatísticas</h2>
+      <div class="form-inline mb-3">
+        <select id="filterMonth" class="form-control mr-2">
+          <option value="">Selecione o Mês</option>
+          <option value="1">Janeiro</option>
+          <option value="2">Fevereiro</option>
+          <option value="3">Março</option>
+          <option value="4">Abril</option>
+          <option value="5">Maio</option>
+          <option value="6">Junho</option>
+          <option value="7">Julho</option>
+          <option value="8">Agosto</option>
+          <option value="9">Setembro</option>
+          <option value="10">Outubro</option>
+          <option value="11">Novembro</option>
+          <option value="12">Dezembro</option>
+        </select>
+        <select id="filterYear" class="form-control mr-2">
+          <option value="">Selecione o Ano</option>
+        </select>
+        <select id="chartType" class="form-control mr-2">
+          <option value="daily">Diário</option>
+          <option value="categories">Categorias</option>
+          <option value="monthly_total">Total Mensal</option>
+        </select>
+        <button class="btn btn-primary" id="updateChart">Atualizar</button>
+      </div>
+      <div class="chart-container">
+        <div style="width: 600px; height: 400px; overflow: hidden;">
+          <canvas id="expenseChart"></canvas>
         </div>
-        <div class="chart-container">
-            <div style="width: 600px; height: 400px; overflow: hidden;">
-                <canvas id="expenseChart"></canvas>
-            </div>
-        </div>
+      </div>
     </div>
 
     <script>
-        // Preencher anos disponíveis
-        const yearSelect = document.getElementById('filterYear');
-        const currentYear = new Date().getFullYear();
-        const minYear = 2025;
-        const maxYear = currentYear + 10;
-
-        for (let year = minYear; year <= maxYear; year++) {
-            const option = document.createElement('option');
-            option.value = year;
-            option.textContent = year;
-            yearSelect.appendChild(option);
+      // Preencher anos disponíveis
+      const yearSelect = document.getElementById('filterYear')
+      const currentYear = new Date().getFullYear()
+      const minYear = 2025
+      const maxYear = currentYear + 10
+      
+      for (let year = minYear; year <= maxYear; year++) {
+        const option = document.createElement('option')
+        option.value = year
+        option.textContent = year
+        yearSelect.appendChild(option)
+      }
+      
+      let expenseChart
+      
+      // Configuração do gráfico
+      async function updateChartData() {
+        const month = document.getElementById('filterMonth').value
+        const year = document.getElementById('filterYear').value
+        const chartType = document.getElementById('chartType').value
+      
+        try {
+          const response = await fetch(`/update-chart/?month=${month}&year=${year}`)
+          const data = await response.json()
+      
+          if (expenseChart) {
+            expenseChart.destroy()
+          }
+      
+          const ctx = document.getElementById('expenseChart').getContext('2d')
+          const config = getChartConfig(chartType, data)
+          expenseChart = new Chart(ctx, config)
+        } catch (error) {
+          console.error('Erro ao atualizar gráfico:', error)
+          alert('Erro ao carregar dados do gráfico')
         }
-
-        let expenseChart;
-
-        // Configuração do gráfico
-        async function updateChartData() {
-            const month = document.getElementById('filterMonth').value;
-            const year = document.getElementById('filterYear').value;
-            const chartType = document.getElementById('chartType').value;
-
-            try {
-                const response = await fetch(`/update-chart/?month=${month}&year=${year}`);
-                const data = await response.json();
-
-                if (expenseChart) {
-                    expenseChart.destroy();
+      }
+      
+      function getChartConfig(type, data) {
+        const options = {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  return new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                  }).format(context.raw)
                 }
-
-                const ctx = document.getElementById('expenseChart').getContext('2d');
-                const config = getChartConfig(chartType, data);
-                expenseChart = new Chart(ctx, config);
-            } catch (error) {
-                console.error('Erro ao atualizar gráfico:', error);
-                alert('Erro ao carregar dados do gráfico');
+              }
+            }
+          }
+        }
+      
+        switch (type) {
+          case 'daily':
+            const dates = Object.keys(data.daily).sort((a, b) => {
+              const [dayA, monthA, yearA] = a.split('/').map(Number)
+              const [dayB, monthB, yearB] = b.split('/').map(Number)
+              return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB)
+            })
+            return {
+              type: 'bar',
+              data: {
+                labels: dates,
+                datasets: [
+                  {
+                    label: 'Despesas',
+                    data: dates.map((date) => data.daily[date].Despesa),
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                  },
+                  {
+                    label: 'Receitas',
+                    data: dates.map((date) => data.daily[date].Receita),
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                  }
+                ]
+              },
+              options: options
+            }
+      
+          case 'categories':
+            return {
+              type: 'pie',
+              data: {
+                labels: Object.keys(data.categories),
+                datasets: [
+                  {
+                    data: Object.values(data.categories),
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+                  }
+                ]
+              },
+              options: options
+            }
+      
+          case 'monthly_total':
+            return {
+              type: 'bar',
+              data: {
+                labels: ['Total Mensal'],
+                datasets: [
+                  {
+                    data: [data.monthly_total],
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                  }
+                ]
+              },
+              options: options
             }
         }
-
-        function getChartConfig(type, data) {
-            const options = {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return new Intl.NumberFormat('pt-BR', {
-                                    style: 'currency',
-                                    currency: 'BRL'
-                                }).format(context.raw);
-                            }
-                        }
-                    }
-                }
-            };
-
-            switch(type) {
-                case 'daily':
-                    return {
-                        type: 'bar',
-                        data: {
-                            labels: Object.keys(data.daily),
-                            datasets: [
-                                {
-                                    label: 'Despesas',
-                                    data: Object.values(data.daily).map(d => d.Despesa),
-                                    backgroundColor: 'rgba(255, 99, 132, 0.7)'
-                                },
-                                {
-                                    label: 'Receitas',
-                                    data: Object.values(data.daily).map(d => d.Receita),
-                                    backgroundColor: 'rgba(75, 192, 192, 0.7)'
-                                }
-                            ]
-                        },
-                        options: options
-                    };
-
-                case 'categories':
-                    return {
-                        type: 'pie',
-                        data: {
-                            labels: Object.keys(data.categories),
-                            datasets: [{
-                                data: Object.values(data.categories),
-                                backgroundColor: [
-                                    '#FF6384',
-                                    '#36A2EB',
-                                    '#FFCE56',
-                                    '#4BC0C0',
-                                    '#9966FF'
-                                ]
-                            }]
-                        },
-                        options: options
-                    };
-
-                case 'monthly_total':
-                    return {
-                        type: 'bar',
-                        data: {
-                            labels: ['Total Mensal'],
-                            datasets: [{
-                                data: [data.monthly_total],
-                                backgroundColor: 'rgba(75, 192, 192, 0.7)'
-                            }]
-                        },
-                        options: options
-                    };
-            }
-        }
-
-        // Event Listeners
-        document.getElementById('updateChart').addEventListener('click', updateChartData);
-
-        // Carregar gráfico inicial
-        updateChartData();
+      }
+      
+      // Event Listeners
+      document.getElementById('updateChart').addEventListener('click', updateChartData)
+      
+      // Carregar gráfico inicial
+      updateChartData()
     </script>
-</body>
+  </body>
 </html>
