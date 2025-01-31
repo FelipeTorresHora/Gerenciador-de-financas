@@ -93,12 +93,12 @@
             e.preventDefault();
             const formData = new FormData(e.target);
             const rawData = Object.fromEntries(formData.entries());
-
-            // Converter data para DD-MM-YYYY
+    
+            // Alterado para usar '/' como separador
             const [year, month, day] = rawData.Data.split('-');
             const formattedData = {
                 ...rawData,
-                Data: `${day}-${month}-${year}`
+                Data: `${day}/${month}/${year}` // Formato DD/MM/YYYY
             };
 
             try {

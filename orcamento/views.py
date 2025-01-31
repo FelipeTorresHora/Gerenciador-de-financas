@@ -72,32 +72,26 @@ def update_chart(request):
 
         for row in rows:
             try:
-                # Valida campos obrigatórios
-                if not all(
-                    key in row for key in ["Data", "Tipo", "Valor", "Categoria"]
-                ):
+                if not all(key in row for key in ["Data", "Tipo", "Valor", "Categoria"]):
                     continue
 
-                # Processa a data (formato DD/MM/YYYY)
+                # Corrigido: Split por '-' para datas no formato DD-MM-YYYY
                 date_str = row["Data"]
                 day, month_data, year_data = date_str.split("/")
 
-                # Filtra por mês/ano
+                # Filtro por mês/ano
                 if month and year:
                     if int(month_data) != int(month) or int(year_data) != int(year):
                         continue
 
-                # Padroniza o campo "Tipo" (aceita plural e singular)
                 tipo = row["Tipo"].strip().lower()
                 if tipo in ["receita", "receitas"]:
                     tipo = "Receita"
                 elif tipo in ["despesa", "despesas"]:
                     tipo = "Despesa"
                 else:
-                    logger.error(f"Tipo inválido: {tipo}")
                     continue
 
-                # Converte o valor para float
                 valor_str = (
                     row["Valor"]
                     .replace("R$", "")
@@ -107,66 +101,48 @@ def update_chart(request):
                 )
                 valor = float(valor_str)
 
-                # Atualiza dados diários
+                # Formato da chave mantido como DD/MM/YYYY
                 date_key = f"{day}/{month_data}/{year_data}"
                 if date_key not in daily_data:
                     daily_data[date_key] = {"Despesa": 0, "Receita": 0}
                 daily_data[date_key][tipo] += valor
 
-                # Atualiza categorias (apenas despesas)
                 if tipo == "Despesa":
                     category = row["Categoria"]
                     category_data[category] = category_data.get(category, 0) + valor
 
-                # Total mensal (apenas receitas)
                 if tipo == "Receita":
                     monthly_total += valor
 
-            except (ValueError, KeyError, AttributeError) as e:
-                logger.error(f"Erro na linha {row}. Detalhes: {str(e)}")
+            except Exception as e:
+                logger.error(f"Erro na linha {row}: {str(e)}")
                 continue
 
-            if month and year:
-                # Preencher todos os dias do mês
-                _, last_day = monthrange(int(year), int(month))
-
-                ordered_daily = {}
-                for day in range(1, last_day + 1):
-                    date_key = f"{day:02d}/{month}/{year}"
-                    ordered_daily[date_key] = daily_data.get(
-                        date_key, {"Despesa": 0, "Receita": 0}
-                    )
-
-                daily_data = ordered_daily
-            else:
-                # Ordenar datas existentes
-                sorted_dates = sorted(
-                    daily_data.keys(),
-                    key=lambda x: tuple(
-                        map(int, x.split("/")[::-1])
-                    ),  # Ordena por ano/mês/dia
+        # Movido para fora do loop: Preenchimento dos dias do mês
+        if month and year:
+            _, last_day = monthrange(int(year), int(month))
+            ordered_daily = {}
+            for day in range(1, last_day + 1):
+                # Formata dia e mês com dois dígitos
+                formatted_day = f"{day:02d}"
+                formatted_month = f"{int(month):02d}"
+                date_key = f"{formatted_day}/{formatted_month}/{year}"
+                ordered_daily[date_key] = daily_data.get(
+                    date_key, {"Despesa": 0, "Receita": 0}
                 )
-                daily_data = {date: daily_data[date] for date in sorted_dates}
+            daily_data = ordered_daily
+        else:
+            sorted_dates = sorted(
+                daily_data.keys(),
+                key=lambda x: tuple(map(int, x.split("/")[::-1]))
+            )
+            daily_data = {date: daily_data[date] for date in sorted_dates}
 
-        return JsonResponse(
-            {
-                "daily": daily_data,
-                "categories": category_data,
-                "monthly_total": monthly_total,
-            }
-        )
-
-    except Exception as e:
-        logger.error(f"Erro geral: {str(e)}")
-        return JsonResponse({"message": "Erro ao buscar dados"}, status=500)
-
-        return JsonResponse(
-            {
-                "daily": daily_data,
-                "categories": category_data,
-                "monthly_total": monthly_total,
-            }
-        )
+        return JsonResponse({
+            "daily": daily_data,
+            "categories": category_data,
+            "monthly_total": monthly_total
+        })
 
     except Exception as e:
         logger.error(f"Erro geral: {str(e)}")
