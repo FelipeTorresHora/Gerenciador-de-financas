@@ -48,11 +48,14 @@
     </style>
 </head>
 <body>
-    <!-- Barra Lateral -->
-    <div class="sidebar">
-        <a href="{% url 'index' %}">Dashboard</a>
-        <a href="{% url 'transacoes' %}">Transações</a>
-    </div>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="d-flex flex-column">
+            <h3 class="mb-4">📊 Finanças</h3>
+            <a href="{% url 'index' %}" class="nav-link active">Dashboard</a>
+            <a href="{% url 'transacoes' %}" class="nav-link">Transações</a>
+        </div>
+    </nav>
 
     <!-- Conteúdo Principal -->
     <div class="main-content">

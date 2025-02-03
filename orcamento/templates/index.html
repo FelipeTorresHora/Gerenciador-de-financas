@@ -1,218 +1,350 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard - Gerenciador de Orçamento</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Financeiro Pro</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-      body {
-        background-color: #1e1e1e;
-        color: #f8f9fa;
-      }
-      .sidebar {
-        height: 100vh;
-        width: 250px;
-        position: fixed;
-        top: 0;
-        left: 0;
-        background-color: #343a40;
-        padding-top: 20px;
-      }
-      .sidebar a {
-        padding: 10px 15px;
-        text-decoration: none;
-        font-size: 18px;
-        color: #f8f9fa;
-        display: block;
-      }
-      .sidebar a:hover {
-        background-color: #495057;
-      }
-      .main-content {
-        margin-left: 250px;
-        padding: 20px;
-      }
-      .chart-container {
-        width: 100%;
-        height: 75vh; /* Ocupa 75% da altura da tela */
-        position: relative;
-      }
-    
-      .chart-container > div {
-        width: 100% !important;
-        height: 100% !important;
-      }
-    
-      #expenseChart {
-        width: 100% !important;
-        height: 100% !important;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Barra Lateral -->
-    <div class="sidebar">
-      <a href="{% url 'index' %}">Dashboard</a>
-      <a href="{% url 'transacoes' %}">Transações</a>
-    </div>
+        :root {
+            --primary-color: #3B82F6;
+            --secondary-color: #10B981;
+            --danger-color: #EF4444;
+            --dark-bg: #111827;
+            --card-bg: #1F2937;
+        }
 
-    <!-- Conteúdo Principal -->
-    <div class="main-content">
-      <h2>Estatísticas</h2>
-      <div class="form-inline mb-3">
-        <select id="filterMonth" class="form-control mr-2">
-          <option value="">Selecione o Mês</option>
-          <option value="1">Janeiro</option>
-          <option value="2">Fevereiro</option>
-          <option value="3">Março</option>
-          <option value="4">Abril</option>
-          <option value="5">Maio</option>
-          <option value="6">Junho</option>
-          <option value="7">Julho</option>
-          <option value="8">Agosto</option>
-          <option value="9">Setembro</option>
-          <option value="10">Outubro</option>
-          <option value="11">Novembro</option>
-          <option value="12">Dezembro</option>
-        </select>
-        <select id="filterYear" class="form-control mr-2">
-          <option value="">Selecione o Ano</option>
-        </select>
-        <select id="chartType" class="form-control mr-2">
-          <option value="daily">Diário</option>
-          <option value="categories">Categorias</option>
-          <option value="monthly_total">Total Mensal</option>
-        </select>
-        <button class="btn btn-primary" id="updateChart">Atualizar</button>
-      </div>
-      <div class="chart-container">
-        <canvas id="expenseChart"></canvas>
-      </div>
+        body {
+            background-color: var(--dark-bg);
+            color: #F9FAFB;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-right: 1px solid #374151;
+        }
+
+        .nav-link {
+            color: #9CA3AF;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: #374151;
+            color: #E5E7EB;
+        }
+
+        .main-content {
+            padding: 2rem;
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .filter-card {
+            grid-column: 1 / -1;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            border: 1px solid #374151;
+        }
+
+        .chart-card {
+            grid-column: 1 / -1;
+            height: 600px;
+            background: var(--card-bg);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+
+        #refreshButton {
+            background: var(--primary-color);
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        #refreshButton:hover {
+            filter: brightness(1.2);
+            transform: scale(1.05);
+        }
+
+        .toast {
+            backdrop-filter: blur(10px);
+            background-color: rgba(31, 41, 55, 0.9) !important;
+            border: 1px solid #374151 !important;
+        }
+
+        #lastUpdate {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            text-align: right;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="d-flex flex-column">
+                <h3 class="mb-4">📈 Finanças Pro</h3>
+                <a href="{% url 'index' %}" class="nav-link active">Dashboard</a>
+                <a href="{% url 'transacoes' %}" class="nav-link">Transações</a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Filtros -->
+            <div class="filter-card">
+                <select id="filterYear" class="form-control bg-dark text-light">
+                    <option value="">Todos os Anos</option>
+                </select>
+                
+                <select id="filterMonth" class="form-control bg-dark text-light">
+                    <option value="">Todos os Meses</option>
+                    <option value="01">Janeiro</option>
+                    <option value="02">Fevereiro</option>
+                    <option value="03">Março</option>
+                    <option value="04">Abril</option>
+                    <option value="05">Maio</option>
+                    <option value="06">Junho</option>
+                    <option value="07">Julho</option>
+                    <option value="08">Agosto</option>
+                    <option value="09">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
+
+                <select id="filterCategory" class="form-control bg-dark text-light">
+                    <option value="">Todas Categorias</option>
+                </select>
+
+                <button class="btn btn-primary" id="refreshButton">
+                    🔄 Atualizar Dados
+                </button>
+            </div>
+
+            <!-- Métricas -->
+            <div class="metric-card">
+                <div class="text-muted">Total Anual</div>
+                <div class="metric-value" id="annualTotal">-</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="text-muted">Mês Atual</div>
+                <div class="metric-value" id="monthlyTotal">-</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="text-muted">Categoria</div>
+                <div class="metric-value" id="categoryTotal">-</div>
+            </div>
+
+            <!-- Gráfico Principal -->
+            <div class="chart-card">
+                <canvas id="mainChart"></canvas>
+            </div>
+
+            <div id="lastUpdate"></div>
+        </main>
+
+        <!-- Toast Container -->
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div id="loadingToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-body">
+                    🕒 Atualizando dados da planilha...
+                </div>
+            </div>
+            
+            <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-body">
+                    ❌ Erro ao atualizar dados!
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-      // Preencher anos disponíveis
-      const yearSelect = document.getElementById('filterYear')
-      const currentYear = new Date().getFullYear()
-      const minYear = 2025
-      const maxYear = currentYear + 10
-      
-      for (let year = minYear; year <= maxYear; year++) {
-        const option = document.createElement('option')
-        option.value = year
-        option.textContent = year
-        yearSelect.appendChild(option)
-      }
-      
-      let expenseChart
-      
-      // Configuração do gráfico
-      async function updateChartData() {
-        const month = document.getElementById('filterMonth').value
-        const year = document.getElementById('filterYear').value
-        const chartType = document.getElementById('chartType').value
-      
-        try {
-          const response = await fetch(`/update-chart/?month=${month}&year=${year}`)
-          const data = await response.json()
-      
-          if (expenseChart) {
-            expenseChart.destroy()
-          }
-      
-          const ctx = document.getElementById('expenseChart').getContext('2d')
-          const config = getChartConfig(chartType, data)
-          expenseChart = new Chart(ctx, config)
-        } catch (error) {
-          console.error('Erro ao atualizar gráfico:', error)
-          alert('Erro ao carregar dados do gráfico')
+        let mainChart;
+        const currencyFormatter = new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        });
+
+        // Inicializar anos de 2025 a 2030
+        const yearSelect = document.getElementById('filterYear');
+        const startYear = 2025;
+        const endYear = 2030;
+
+        yearSelect.innerHTML = '<option value="">Todos os Anos</option>';
+        for (let year = startYear; year <= endYear; year++) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearSelect.appendChild(option);
         }
-      }
-      
-      function getChartConfig(type, data) {
-        const options = {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  return new Intl.NumberFormat('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL'
-                  }).format(context.raw)
+
+        // Sistema de atualização
+        let currentData = null;
+
+        async function updateDashboard() {
+            try {
+                showToast('loadingToast');
+                
+                const params = new URLSearchParams({
+                    year: document.getElementById('filterYear').value,
+                    month: document.getElementById('filterMonth').value,
+                    category: document.getElementById('filterCategory').value,
+                    refresh: new Date().getTime() // Evitar cache
+                });
+
+                const response = await fetch(`/update-chart/?${params}`);
+                
+                if (!response.ok) throw new Error('Erro na resposta da API');
+                
+                currentData = await response.json();
+                
+                renderChart(currentData);
+                updateMetrics(currentData);
+                updateFilters(currentData);
+                
+                updateTimestamp();
+                hideToast('loadingToast');
+
+            } catch (error) {
+                console.error('Erro na atualização:', error);
+                showToast('errorToast');
+                hideToast('loadingToast');
+            }
+        }
+
+        function renderChart(data) {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            
+            if (mainChart) mainChart.destroy();
+
+            mainChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.daily),
+                    datasets: [{
+                        label: 'Gastos Diários',
+                        data: Object.values(data.daily),
+                        backgroundColor: '#3B82F6',
+                        borderColor: '#2563EB',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => currencyFormatter.format(ctx.raw)
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => currencyFormatter.format(value)
+                            }
+                        }
+                    }
                 }
-              }
-            }
-          }
+            });
         }
-      
-        switch (type) {
-          case 'daily':
-            const dates = Object.keys(data.daily).sort((a, b) => {
-              const [dayA, monthA, yearA] = a.split('/').map(Number)
-              const [dayB, monthB, yearB] = b.split('/').map(Number)
-              return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB)
-            })
-            return {
-              type: 'bar',
-              data: {
-                labels: dates,
-                datasets: [
-                  {
-                    label: 'Despesas',
-                    data: dates.map((date) => data.daily[date].Despesa),
-                    backgroundColor: 'rgba(255, 99, 132, 0.7)'
-                  },
-                  {
-                    label: 'Receitas',
-                    data: dates.map((date) => data.daily[date].Receita),
-                    backgroundColor: 'rgba(75, 192, 192, 0.7)'
-                  }
-                ]
-              },
-              options: options
-            }
-      
-          case 'categories':
-            return {
-              type: 'pie',
-              data: {
-                labels: Object.keys(data.categories),
-                datasets: [
-                  {
-                    data: Object.values(data.categories),
-                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
-                  }
-                ]
-              },
-              options: options
-            }
-      
-          case 'monthly_total':
-            return {
-              type: 'bar',
-              data: {
-                labels: ['Total Mensal'],
-                datasets: [
-                  {
-                    data: [data.monthly_total],
-                    backgroundColor: 'rgba(75, 192, 192, 0.7)'
-                  }
-                ]
-              },
-              options: options
+
+        function updateMetrics(data) {
+            document.getElementById('annualTotal').textContent = 
+                currencyFormatter.format(data.annual_total || 0);
+            
+            document.getElementById('monthlyTotal').textContent = 
+                currencyFormatter.format(data.monthly_total || 0);
+            
+            document.getElementById('categoryTotal').textContent = 
+                currencyFormatter.format(data.category_total || 0);
+        }
+
+        function updateFilters(data) {
+            // Atualizar categorias dinamicamente
+            const categorySelect = document.getElementById('filterCategory');
+            categorySelect.innerHTML = '<option value="">Todas Categorias</option>';
+            
+            if (data.categories) {
+                Object.keys(data.categories).forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    categorySelect.appendChild(option);
+                });
             }
         }
-      }
-      
-      // Event Listeners
-      document.getElementById('updateChart').addEventListener('click', updateChartData)
-      
-      // Carregar gráfico inicial
-      updateChartData()
+
+        function showToast(id) {
+            const toast = new bootstrap.Toast(document.getElementById(id));
+            toast.show();
+        }
+
+        function hideToast(id) {
+            const toast = bootstrap.Toast.getInstance(document.getElementById(id));
+            if (toast) toast.hide();
+        }
+
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = 
+                `Última atualização: ${now.toLocaleTimeString()}`;
+        }
+
+        // Event Listeners
+        document.getElementById('refreshButton').addEventListener('click', updateDashboard);
+        
+        document.querySelectorAll('select').forEach(select => {
+            select.addEventListener('change', () => {
+                if (currentData) renderChart(currentData);
+            });
+        });
+
+        // Inicialização
+        updateDashboard();
     </script>
-  </body>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

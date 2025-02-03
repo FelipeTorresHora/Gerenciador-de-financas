@@ -10,3 +10,50 @@ h1, h2 {
 .table {
     margin-top: 20px;
 }
+.toast {
+    backdrop-filter: blur(10px);
+    background-color: rgba(31, 41, 55, 0.9) !important;
+    border: 1px solid #374151 !important;
+}
+
+#refreshButton {
+    background: var(--primary-color);
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+#refreshButton:hover {
+    filter: brightness(1.2);
+    transform: scale(1.05);
+}
+
+#lastUpdate {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+/* Adicione ao CSS existente */
+.toast {
+    backdrop-filter: blur(10px);
+    background-color: rgba(31, 41, 55, 0.9) !important;
+    border: 1px solid #374151 !important;
+}
+
+#refreshButton {
+    background: var(--primary-color);
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+#refreshButton:hover {
+    filter: brightness(1.2);
+    transform: scale(1.05);
+}
+
+#lastUpdate {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
