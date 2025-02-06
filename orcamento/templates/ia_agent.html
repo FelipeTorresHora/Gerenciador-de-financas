@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistente de Investimentos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body { background-color: #1a1a1a; color: #e0e0e0; }
+        .chat-container { max-width: 800px; margin: auto; }
+        .chat-message { 
+            background: #2d2d2d; 
+            border-radius: 15px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .user-message { background: #3d3d3d; }
+        .bot-message { background: #2d2d2d; }
+        #chat-history { height: 70vh; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="d-flex flex-column">
+            <h3 class="mb-4">🤖 Assistente IA</h3>
+            <a href="{% url 'index' %}" class="nav-link">Dashboard</a>
+            <a href="{% url 'transacoes' %}" class="nav-link">Transações</a>
+            <a href="{% url 'ia_agent' %}" class="nav-link active">Assistente IA</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="container chat-container">
+            <h2 class="mb-4">Assistente Financeiro Inteligente</h2>
+            
+            <div id="chat-history" class="mb-3"></div>
+            
+            <div class="input-group">
+                <input type="text" id="user-input" class="form-control bg-dark text-light" 
+                       placeholder="Digite sua pergunta sobre investimentos...">
+                <button id="send-btn" class="btn btn-primary">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatHistory = document.getElementById('chat-history');
+        const userInput = document.getElementById('user-input');
+        
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Adiciona mensagem do usuário
+            chatHistory.innerHTML += `
+                <div class="chat-message user-message">
+                    <strong>Você:</strong><br>
+                    ${message}
+                </div>
+            `;
+
+            // Resposta do bot
+            const botResponseDiv = document.createElement('div');
+            botResponseDiv.className = 'chat-message bot-message';
+            botResponseDiv.innerHTML = '<strong>Assistente:</strong><br>⌛ Processando...';
+            chatHistory.appendChild(botResponseDiv);
+
+            try {
+                const response = await fetch('/ia-agent/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+                botResponseDiv.innerHTML = `<strong>Assistente:</strong><br>${data.response}`;
+                
+            } catch (error) {
+                botResponseDiv.innerHTML = `<strong>Erro:</strong> ${error.message}`;
+            }
+
+            userInput.value = '';
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        // Event Listeners
+        document.getElementById('send-btn').addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>

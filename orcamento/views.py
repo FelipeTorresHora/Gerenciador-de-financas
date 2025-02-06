@@ -5,6 +5,7 @@ import logging
 from sheet2api import Sheet2APIClient
 from django.views.decorators.csrf import csrf_exempt
 from calendar import monthrange
+from orcamento.ia.agent import DeepSeekAgent
 
 logger = logging.getLogger(__name__)
 
@@ -147,3 +148,24 @@ def update_chart(request):
     except Exception as e:
         logger.error(f"Erro geral: {str(e)}")
         return JsonResponse({"message": "Erro ao buscar dados"}, status=500)
+    
+@csrf_exempt
+def ia_agent(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            user_message = data.get('message', '')
+            
+            if not user_message:
+                return JsonResponse({'error': 'Mensagem vazia'}, status=400)
+            
+            agent = DeepSeekAgent()
+            response = agent.get_investment_advice(user_message)
+            
+            return JsonResponse({'response': response})
+        
+        except Exception as e:
+            logger.error(f"Erro no agente IA: {str(e)}")
+            return JsonResponse({'error': 'Erro interno'}, status=500)
+    
+    return render(request, "ia_agent.html")
