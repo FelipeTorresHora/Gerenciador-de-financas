@@ -1,12 +1,28 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
+    font-family: 'Inter', sans-serif;
+    background-color: #111827;
+    color: #F9FAFB;
 }
 
-h1, h2 {
-    text-align: center;
+.toast {
+    backdrop-filter: blur(10px);
+    background-color: rgba(31, 41, 55, 0.9) !important;
+    border: 1px solid #374151 !important;
 }
 
-.table {
-    margin-top: 20px;
+.metric-card {
+    transition: transform 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+}
+
+.chart-card {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+#balanceChart {
+    border-radius: 0.5rem;
+    overflow: hidden;
 }

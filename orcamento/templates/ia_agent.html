@@ -7,6 +7,29 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body { background-color: #1a1a1a; color: #e0e0e0; }
+        .sidebar {
+            height: 100vh;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #343a40;
+            padding-top: 20px;
+        }
+        .sidebar a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 18px;
+            color: #f8f9fa;
+            display: block;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
         .chat-container { max-width: 800px; margin: auto; }
         .chat-message { 
             background: #2d2d2d; 
@@ -20,15 +43,14 @@
     </style>
 </head>
 <body>
-    <nav class="sidebar">
-        <div class="d-flex flex-column">
-            <h3 class="mb-4">🤖 Assistente IA</h3>
-            <a href="{% url 'index' %}" class="nav-link">Dashboard</a>
-            <a href="{% url 'transacoes' %}" class="nav-link">Transações</a>
-            <a href="{% url 'ia_agent' %}" class="nav-link active">Assistente IA</a>
-        </div>
-    </nav>
+    <!-- Barra Lateral -->
+    <div class="sidebar">
+        <a href="{% url 'index' %}">Dashboard</a>
+        <a href="{% url 'transacoes' %}">Transações</a>
+        <a href="{% url 'ia_agent' %}" class="nav-link active">Assistente IA</a>
+    </div>
 
+    <!-- Conteúdo Principal -->
     <div class="main-content">
         <div class="container chat-container">
             <h2 class="mb-4">Assistente Financeiro Inteligente</h2>
