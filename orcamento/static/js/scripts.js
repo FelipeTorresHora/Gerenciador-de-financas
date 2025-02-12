@@ -3,8 +3,12 @@ const tableBody = document.querySelector("#expensesTable tbody");
 const addRowButton = document.getElementById("add-row");
 const saveButton = document.getElementById("save-table");
 const updateChartButton = document.getElementById("update-chart");
+const percentFormatter = new Intl.NumberFormat('pt-BR', {
+    style: 'percent',
+    maximumFractionDigits: 2
+});
 
-// Função para adicionar uma nova linha
+
 function addRow() {
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -17,14 +21,13 @@ function addRow() {
     tableBody.appendChild(row);
 }
 
-// Função para excluir uma linha
+
 function deleteRow(event) {
     if (event.target.classList.contains("delete-row")) {
         event.target.closest("tr").remove();
     }
 }
 
-// Função para salvar a tabela
 function saveTable() {
     const rows = tableBody.querySelectorAll("tr");
     const data = [];
@@ -64,7 +67,6 @@ function saveTable() {
     });
 }
 
-// Função para atualizar os gráficos
 function updateChart() {
     fetch("/update-chart/")
         .then((response) => response.json())
@@ -133,7 +135,61 @@ function updateChart() {
         });
 }
 
-// Obter token CSRF
+function updateMetrics(data) {
+    // Atualizar novas métricas
+    const profitElement = document.getElementById('monthlyProfit');
+    const profitTrend = document.getElementById('profitTrend');
+    profitElement.textContent = currencyFormatter.format(data.monthly_profit || 0);
+    profitTrend.innerHTML = data.monthly_profit >= 0 ? 
+        '<span class="text-success">↑</span>' : 
+        '<span class="text-danger">↓</span>';
+
+    document.getElementById('savingsPercent').textContent = 
+        percentFormatter.format((data.savings_percent || 0)/100);
+    
+    document.getElementById('totalInvested').textContent = 
+        currencyFormatter.format(data.total_invested || 0);
+
+    // Renderizar novo gráfico
+    renderBalanceChart(data.accumulated_balance);
+}
+
+function renderBalanceChart(data) {
+    const ctx = document.getElementById('balanceChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Object.keys(data),
+            datasets: [{
+                label: 'Saldo Acumulado',
+                data: Object.values(data),
+                borderColor: '#10B981',
+                tension: 0.4,
+                fill: true,
+                backgroundColor: 'rgba(16, 185, 129, 0.1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => currencyFormatter.format(ctx.raw)
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    ticks: {
+                        callback: (value) => currencyFormatter.format(value)
+                    }
+                }
+            }
+        }
+    });
+}
+
 function getCSRFToken() {
     return document.querySelector("[name=csrfmiddlewaretoken]").value;
 }
@@ -143,6 +199,5 @@ addRowButton.addEventListener("click", addRow);
 tableBody.addEventListener("click", deleteRow);
 saveButton.addEventListener("click", saveTable);
 updateChartButton.addEventListener("click", updateChart);
-
-// Inicializar o gráfico ao carregar a página
 document.addEventListener("DOMContentLoaded", updateChart);
+
