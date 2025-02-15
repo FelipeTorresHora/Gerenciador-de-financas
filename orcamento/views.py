@@ -9,11 +9,14 @@ from orcamento.ia.agent import DeepSeekAgent
 
 logger = logging.getLogger(__name__)
 
+
 def index(request):
     return render(request, "index.html")
 
+
 def transacoes(request):
     return render(request, "transacoes.html")
+
 
 @csrf_exempt
 def save_expense(request):
@@ -39,28 +42,21 @@ def save_expense(request):
             except ValueError:
                 return JsonResponse({"message": "Valor inválido"}, status=400)
 
-            # Criar instância do cliente
+            # Salvar na planilha
             client = Sheet2APIClient(
                 api_url="https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%25C3%25A1gina3"
             )
-            
-            # Criar nova linha
-            client.create_row(row=data)
+            client.create_row(data)
 
             return JsonResponse({"message": "Dados salvos com sucesso!"})
 
         except Exception as e:
             logger.error(f"Erro ao salvar dados: {str(e)}")
-            return JsonResponse({"message": f"Erro ao salvar dados: {str(e)}"}, status=500)
+            return JsonResponse({"message": "Erro ao salvar dados"}, status=500)
 
     return JsonResponse({"message": "Método não permitido"}, status=405)
 
 
-logger = logging.getLogger(__name__)
-
-
-
-@csrf_exempt
 def update_chart(request):
     try:
         month = request.GET.get("month")
