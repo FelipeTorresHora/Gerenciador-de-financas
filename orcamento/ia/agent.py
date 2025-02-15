@@ -1,10 +1,11 @@
-import os
 import requests
-from django.conf import settings
+import os
+from dotenv import load_dotenv
 
 class DeepSeekAgent:
     def __init__(self):
-        self.api_key = settings.DEEPSEEK_API_KEY
+        load_dotenv()  # Carrega variáveis do .env
+        self.api_key = os.getenv("DEEPSEEK_API_KEY")
         self.base_url = "https://api.deepseek.com/v1/chat/completions"
 
     def get_investment_advice(self, user_message):
@@ -18,7 +19,12 @@ class DeepSeekAgent:
             "messages": [
                 {
                     "role": "system",
-                    "content": "Você é um especialista em finanças e investimentos. Forneça conselhos claros e práticos. Use termos simples e exemplos quando apropriado. Formate as respostas em HTML simples com parágrafos e listas."
+                    "content": ''' Você é um especialista em finanças e investimentos. 
+                    Se a pessoa tem dividas, sempre aconselhe primeiro a quitar todas suas dividas para depois investir.
+                    Analise o perfil do usuário e sugira um investimento adequado (Arrojado, equilibrado ou conservador).
+                    Mostre várias formas de investir, como ações, criptomoedas, tesouro direto...
+                    Use termos simples e exemplos quando apropriado. 
+                    Formate as respostas em HTML simples com parágrafos e listas.'''
                 },
                 {
                     "role": "user",
