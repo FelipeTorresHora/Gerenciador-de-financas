@@ -1,219 +1,288 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard - Gerenciador de Orçamento</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-      body {
-        background-color: #1e1e1e;
-        color: #f8f9fa;
-      }
-      .sidebar {
-        height: 100vh;
-        width: 250px;
-        position: fixed;
-        top: 0;
-        left: 0;
-        background-color: #343a40;
-        padding-top: 20px;
-      }
-      .sidebar a {
-        padding: 10px 15px;
-        text-decoration: none;
-        font-size: 18px;
-        color: #f8f9fa;
-        display: block;
-      }
-      .sidebar a:hover {
-        background-color: #495057;
-      }
-      .main-content {
-        margin-left: 250px;
-        padding: 20px;
-      }
-      .chart-container {
-        width: 100%;
-        height: 75vh; /* Ocupa 75% da altura da tela */
-        position: relative;
-      }
-    
-      .chart-container > div {
-        width: 100% !important;
-        height: 100% !important;
-      }
-    
-      #expenseChart {
-        width: 100% !important;
-        height: 100% !important;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Barra Lateral -->
-    <div class="sidebar">
-      <a href="{% url 'index' %}">Dashboard</a>
-      <a href="{% url 'transacoes' %}">Transações</a>
-      <a href="{% url 'ia_agent' %}" class="nav-link">Assistente IA</a>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Finanças</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="flex flex-col min-h-screen">
+        <!-- Navbar -->
+        <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
+            <div class="container mx-auto px-4 py-3">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-wallet text-2xl"></i>
+                        <h1 class="text-xl font-bold">Gerenciador de Finanças</h1>
+                    </div>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="/" class="hover:text-blue-200 font-medium flex items-center">
+                            <i class="fas fa-home mr-1"></i> Início
+                        </a>
+                        <a href="/transacoes" class="hover:text-blue-200 font-medium flex items-center">
+                            <i class="fas fa-exchange-alt mr-1"></i> Transações
+                        </a>
+                        <a href="/ia-agent" class="hover:text-blue-200 font-medium flex items-center">
+                            <i class="fas fa-robot mr-1"></i> Assistente IA
+                        </a>
+                    </div>
+                    <div class="md:hidden">
+                        <button id="mobile-menu-button" class="text-white focus:outline-none">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- Mobile Menu -->
+                <div id="mobile-menu" class="md:hidden hidden mt-3 pb-2">
+                    <a href="/" class="block py-2 hover:text-blue-200 font-medium">
+                        <i class="fas fa-home mr-1"></i> Início
+                    </a>
+                    <a href="/transacoes" class="block py-2 hover:text-blue-200 font-medium">
+                        <i class="fas fa-exchange-alt mr-1"></i> Transações
+                    </a>
+                    <a href="/ia-agent" class="block py-2 hover:text-blue-200 font-medium">
+                        <i class="fas fa-robot mr-1"></i> Assistente IA
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 py-8">
+            <!-- Dashboard Header -->
+            <div class="mb-8 text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Bem-vindo ao seu Gerenciador Financeiro</h2>
+                <p class="text-gray-600">Acompanhe, analise e gerencie suas finanças de forma simples e eficiente.</p>
+            </div>
+
+            <!-- Financial Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Balance Card -->
+                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500 transform transition-transform hover:scale-105">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Saldo Total</p>
+                            <p class="text-2xl font-bold text-gray-800">R$ 2.500,00</p>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <i class="fas fa-wallet text-blue-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Income Card -->
+                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500 transform transition-transform hover:scale-105">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Receitas</p>
+                            <p class="text-2xl font-bold text-green-600">R$ 4.000,00</p>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <i class="fas fa-arrow-up text-green-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expenses Card -->
+                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500 transform transition-transform hover:scale-105">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Despesas</p>
+                            <p class="text-2xl font-bold text-red-600">R$ 1.500,00</p>
+                        </div>
+                        <div class="bg-red-100 p-3 rounded-full">
+                            <i class="fas fa-arrow-down text-red-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Savings Card -->
+                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500 transform transition-transform hover:scale-105">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Economia</p>
+                            <p class="text-2xl font-bold text-purple-600">R$ 500,00</p>
+                        </div>
+                        <div class="bg-purple-100 p-3 rounded-full">
+                            <i class="fas fa-piggy-bank text-purple-500"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Ações Rápidas</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <a href="/transacoes" class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg p-4 text-center transition-colors">
+                        <i class="fas fa-plus-circle text-2xl mb-2"></i>
+                        <p class="font-medium">Nova Transação</p>
+                    </a>
+                    <a href="#" class="bg-green-500 hover:bg-green-600 text-white rounded-lg p-4 text-center transition-colors">
+                        <i class="fas fa-chart-line text-2xl mb-2"></i>
+                        <p class="font-medium">Ver Relatórios</p>
+                    </a>
+                    <a href="#" class="bg-purple-500 hover:bg-purple-600 text-white rounded-lg p-4 text-center transition-colors">
+                        <i class="fas fa-bullseye text-2xl mb-2"></i>
+                        <p class="font-medium">Definir Metas</p>
+                    </a>
+                    <a href="/ia-agent" class="bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg p-4 text-center transition-colors">
+                        <i class="fas fa-robot text-2xl mb-2"></i>
+                        <p class="font-medium">Consultar IA</p>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Transações Recentes</h3>
+                    <a href="/transacoes" class="text-blue-500 hover:text-blue-700 font-medium flex items-center">
+                        Ver todas <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Salário</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Renda</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">01/05/2023</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-green-600">+ R$ 3.500,00</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Aluguel</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Moradia</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">05/05/2023</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-red-600">- R$ 800,00</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Supermercado</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Alimentação</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10/05/2023</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-red-600">- R$ 350,00</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Freelance</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Renda Extra</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15/05/2023</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-green-600">+ R$ 500,00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Budget Progress -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Progresso do Orçamento</h3>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-700">Alimentação</span>
+                            <span class="text-sm font-medium text-gray-700">70% (R$ 350 / R$ 500)</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 70%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-700">Moradia</span>
+                            <span class="text-sm font-medium text-gray-700">100% (R$ 800 / R$ 800)</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-700">Transporte</span>
+                            <span class="text-sm font-medium text-gray-700">50% (R$ 150 / R$ 300)</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 50%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-700">Lazer</span>
+                            <span class="text-sm font-medium text-gray-700">30% (R$ 60 / R$ 200)</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 30%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white py-6">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="mb-4 md:mb-0">
+                        <h3 class="text-lg font-bold mb-2">Gerenciador de Finanças</h3>
+                        <p class="text-gray-400 text-sm">Controle suas finanças de forma simples e eficiente.</p>
+                    </div>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="mt-6 border-t border-gray-700 pt-6 text-center text-gray-400 text-sm">
+                    &copy; 2023 Gerenciador de Finanças. Todos os direitos reservados.
+                </div>
+            </div>
+        </footer>
     </div>
 
-    <!-- Conteúdo Principal -->
-    <div class="main-content">
-      <h2>Estatísticas</h2>
-      <div class="form-inline mb-3">
-        <select id="filterMonth" class="form-control mr-2">
-          <option value="">Selecione o Mês</option>
-          <option value="1">Janeiro</option>
-          <option value="2">Fevereiro</option>
-          <option value="3">Março</option>
-          <option value="4">Abril</option>
-          <option value="5">Maio</option>
-          <option value="6">Junho</option>
-          <option value="7">Julho</option>
-          <option value="8">Agosto</option>
-          <option value="9">Setembro</option>
-          <option value="10">Outubro</option>
-          <option value="11">Novembro</option>
-          <option value="12">Dezembro</option>
-        </select>
-        <select id="filterYear" class="form-control mr-2">
-          <option value="">Selecione o Ano</option>
-        </select>
-        <select id="chartType" class="form-control mr-2">
-          <option value="daily">Diário</option>
-          <option value="categories">Categorias</option>
-          <option value="monthly_total">Total Mensal</option>
-        </select>
-        <button class="btn btn-primary" id="updateChart">Atualizar</button>
-      </div>
-      <div class="chart-container">
-        <canvas id="expenseChart"></canvas>
-      </div>
-    </div>
-
+    <script src="/static/js/scripts.js"></script>
     <script>
-      // Preencher anos disponíveis
-      const yearSelect = document.getElementById('filterYear')
-      const currentYear = new Date().getFullYear()
-      const minYear = 2025
-      const maxYear = currentYear + 10
-      
-      for (let year = minYear; year <= maxYear; year++) {
-        const option = document.createElement('option')
-        option.value = year
-        option.textContent = year
-        yearSelect.appendChild(option)
-      }
-      
-      let expenseChart
-      
-      // Configuração do gráfico
-      async function updateChartData() {
-        const month = document.getElementById('filterMonth').value
-        const year = document.getElementById('filterYear').value
-        const chartType = document.getElementById('chartType').value
-      
-        try {
-          const response = await fetch(`/update-chart/?month=${month}&year=${year}`)
-          const data = await response.json()
-      
-          if (expenseChart) {
-            expenseChart.destroy()
-          }
-      
-          const ctx = document.getElementById('expenseChart').getContext('2d')
-          const config = getChartConfig(chartType, data)
-          expenseChart = new Chart(ctx, config)
-        } catch (error) {
-          console.error('Erro ao atualizar gráfico:', error)
-          alert('Erro ao carregar dados do gráfico')
-        }
-      }
-      
-      function getChartConfig(type, data) {
-        const options = {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  return new Intl.NumberFormat('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL'
-                  }).format(context.raw)
-                }
-              }
-            }
-          }
-        }
-      
-        switch (type) {
-          case 'daily':
-            const dates = Object.keys(data.daily).sort((a, b) => {
-              const [dayA, monthA, yearA] = a.split('/').map(Number)
-              const [dayB, monthB, yearB] = b.split('/').map(Number)
-              return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB)
-            })
-            return {
-              type: 'bar',
-              data: {
-                labels: dates,
-                datasets: [
-                  {
-                    label: 'Despesas',
-                    data: dates.map((date) => data.daily[date].Despesa),
-                    backgroundColor: 'rgba(255, 99, 132, 0.7)'
-                  },
-                  {
-                    label: 'Receitas',
-                    data: dates.map((date) => data.daily[date].Receita),
-                    backgroundColor: 'rgba(75, 192, 192, 0.7)'
-                  }
-                ]
-              },
-              options: options
-            }
-      
-          case 'categories':
-            return {
-              type: 'pie',
-              data: {
-                labels: Object.keys(data.categories),
-                datasets: [
-                  {
-                    data: Object.values(data.categories),
-                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
-                  }
-                ]
-              },
-              options: options
-            }
-      
-          case 'monthly_total':
-            return {
-              type: 'bar',
-              data: {
-                labels: ['Total Mensal'],
-                datasets: [
-                  {
-                    data: [data.monthly_total],
-                    backgroundColor: 'rgba(75, 192, 192, 0.7)'
-                  }
-                ]
-              },
-              options: options
-            }
-        }
-      }
-      
-      // Event Listeners
-      document.getElementById('updateChart').addEventListener('click', updateChartData)
-      
-      // Carregar gráfico inicial
-      updateChartData()
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
     </script>
-  </body>
-</html>
+</body>
+
