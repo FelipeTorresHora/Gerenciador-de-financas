@@ -65,7 +65,7 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Saldo Total</p>
-                            <p class="text-2xl font-bold text-gray-800">R$ 2.500,00</p>
+                            <p id="balance" class="text-2xl font-bold text-gray-800">R$ 0,00</p>
                         </div>
                         <div class="bg-blue-100 p-3 rounded-full">
                             <i class="fas fa-wallet text-blue-500"></i>
@@ -78,7 +78,7 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Receitas</p>
-                            <p class="text-2xl font-bold text-green-600">R$ 4.000,00</p>
+                            <p id="income" class="text-2xl font-bold text-green-600">R$ 0,00</p>
                         </div>
                         <div class="bg-green-100 p-3 rounded-full">
                             <i class="fas fa-arrow-up text-green-500"></i>
@@ -91,7 +91,7 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Despesas</p>
-                            <p class="text-2xl font-bold text-red-600">R$ 1.500,00</p>
+                            <p id="expenses" class="text-2xl font-bold text-red-600">R$ 0,00</p>
                         </div>
                         <div class="bg-red-100 p-3 rounded-full">
                             <i class="fas fa-arrow-down text-red-500"></i>
@@ -104,7 +104,7 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Economia</p>
-                            <p class="text-2xl font-bold text-purple-600">R$ 500,00</p>
+                            <p id="savings" class="text-2xl font-bold text-purple-600">R$ 0,00</p>
                         </div>
                         <div class="bg-purple-100 p-3 rounded-full">
                             <i class="fas fa-piggy-bank text-purple-500"></i>
@@ -136,7 +136,7 @@
                 </div>
             </div>
 
-            <!-- Recent Transactions -->
+            <!-- Recent Transactions Preview (permanece estático ou pode ser removido) -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-8">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xl font-bold text-gray-800">Transações Recentes</h3>
@@ -144,103 +144,7 @@
                         Ver todas <i class="fas fa-arrow-right ml-1"></i>
                     </a>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">Salário</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Renda</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">01/05/2023</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-green-600">+ R$ 3.500,00</td>
-                            </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">Aluguel</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Moradia</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">05/05/2023</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-red-600">- R$ 800,00</td>
-                            </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">Supermercado</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Alimentação</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10/05/2023</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-red-600">- R$ 350,00</td>
-                            </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">Freelance</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Renda Extra</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15/05/2023</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-green-600">+ R$ 500,00</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Budget Progress -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">Progresso do Orçamento</h3>
-                <div class="space-y-4">
-                    <div>
-                        <div class="flex justify-between mb-1">
-                            <span class="text-sm font-medium text-gray-700">Alimentação</span>
-                            <span class="text-sm font-medium text-gray-700">70% (R$ 350 / R$ 500)</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5">
-                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 70%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between mb-1">
-                            <span class="text-sm font-medium text-gray-700">Moradia</span>
-                            <span class="text-sm font-medium text-gray-700">100% (R$ 800 / R$ 800)</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5">
-                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 100%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between mb-1">
-                            <span class="text-sm font-medium text-gray-700">Transporte</span>
-                            <span class="text-sm font-medium text-gray-700">50% (R$ 150 / R$ 300)</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5">
-                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 50%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between mb-1">
-                            <span class="text-sm font-medium text-gray-700">Lazer</span>
-                            <span class="text-sm font-medium text-gray-700">30% (R$ 60 / R$ 200)</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5">
-                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 30%"></div>
-                        </div>
-                    </div>
-                </div>
+                <!-- Você pode manter como exemplo estático ou removê-lo -->
             </div>
         </main>
 
@@ -268,7 +172,7 @@
                     </div>
                 </div>
                 <div class="mt-6 border-t border-gray-700 pt-6 text-center text-gray-400 text-sm">
-                    &copy; 2023 Gerenciador de Finanças. Todos os direitos reservados.
+                    &copy; 2025 Gerenciador de Finanças. Todos os direitos reservados.
                 </div>
             </div>
         </footer>
@@ -276,13 +180,21 @@
 
     <script src="/static/js/scripts.js"></script>
     <script>
-        // Mobile menu toggle
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        
-        mobileMenuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
+      async function updateCards() {
+        const rows = await fetch("https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%C3%A1gina3").then(r => r.json());
+        let totalIncome = 0, totalExpenses = 0;
+        rows.forEach(r => {
+          const num = parseFloat(r.Valor.replace("R$", "").replace(".", "").replace(",", ".").trim());
+          if (r.Tipo === "Receita") totalIncome += num;
+          else totalExpenses += num;
         });
+        const balance = totalIncome - totalExpenses;
+        document.getElementById("income").innerText    = `R$ ${totalIncome.toFixed(2).replace(".", ",")}`;
+        document.getElementById("expenses").innerText  = `R$ ${totalExpenses.toFixed(2).replace(".", ",")}`;
+        document.getElementById("balance").innerText   = `R$ ${balance.toFixed(2).replace(".", ",")}`;
+        document.getElementById("savings").innerText   = `R$ ${(totalIncome * 0.1).toFixed(2).replace(".", ",")}`;
+      }
+      document.addEventListener("DOMContentLoaded", updateCards);
     </script>
 </body>
-
+</html>
