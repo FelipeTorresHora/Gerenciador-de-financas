@@ -122,3 +122,17 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTransactions();
   }
 });
+
+actionSelect.addEventListener('change', (e) => {
+    const actionInput = document.getElementById('action-input');
+    if (e.target.value === 'delete') {
+      addFields.classList.add('hidden');
+      deleteField.classList.remove('hidden');
+      actionInput.value = 'delete';
+    } else {
+      deleteField.classList.add('hidden');
+      addFields.classList.remove('hidden');
+      actionInput.value = 'add';
+    }
+  });
+  

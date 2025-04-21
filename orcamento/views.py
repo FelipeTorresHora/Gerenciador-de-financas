@@ -4,7 +4,7 @@ import json
 import logging
 from  orcamento.ia.agent import DeepSeekAgent
 from sheet2api import Sheet2APIClient
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect 
 
 logger = logging.getLogger(__name__)
 
@@ -110,6 +110,32 @@ def delete_transaction(request):
             for i, row in enumerate(rows):
                 if str(row.get('Id')) == str(id_to_delete):
                     client.update_row(i + 2, {})
+                    break
+        return redirect('transacoes')
+    return redirect('transacoes')
+
+@csrf_exempt
+def manage_transaction(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        client = Sheet2APIClient(
+            api_url="https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%25C3%25A1gina3"
+        )
+        if action == 'add':
+            data = {
+                'Id': request.POST.get('Id'),
+                'Valor': request.POST.get('Valor'),
+                'Categoria': request.POST.get('Categoria'),
+                'Data': request.POST.get('Data'),
+                'Tipo': request.POST.get('Tipo')
+            }
+            client.create_row(data)
+        elif action == 'delete':
+            id_to_delete = request.POST.get('Id')
+            rows = client.get_rows()
+            for i, row in enumerate(rows):
+                if str(row.get('Id')) == str(id_to_delete):
+                    client.update_row(i + 1, {})  # Ajustado: i+1 pois o índice da linha é relativo, mesmo Id estando na coluna 5
                     break
         return redirect('transacoes')
     return redirect('transacoes')

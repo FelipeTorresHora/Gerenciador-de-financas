@@ -1,200 +1,150 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de Finanças</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciador de Finanças</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <div class="flex flex-col min-h-screen">
-        <!-- Navbar -->
-        <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
-            <div class="container mx-auto px-4 py-3">
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center space-x-2">
-                        <i class="fas fa-wallet text-2xl"></i>
-                        <h1 class="text-xl font-bold">Gerenciador de Finanças</h1>
-                    </div>
-                    <div class="hidden md:flex space-x-6">
-                        <a href="/" class="hover:text-blue-200 font-medium flex items-center">
-                            <i class="fas fa-home mr-1"></i> Início
-                        </a>
-                        <a href="/transacoes" class="hover:text-blue-200 font-medium flex items-center">
-                            <i class="fas fa-exchange-alt mr-1"></i> Transações
-                        </a>
-                        <a href="/ia-agent" class="hover:text-blue-200 font-medium flex items-center">
-                            <i class="fas fa-robot mr-1"></i> Assistente IA
-                        </a>
-                    </div>
-                    <div class="md:hidden">
-                        <button id="mobile-menu-button" class="text-white focus:outline-none">
-                            <i class="fas fa-bars text-xl"></i>
-                        </button>
-                    </div>
-                </div>
-                <!-- Mobile Menu -->
-                <div id="mobile-menu" class="md:hidden hidden mt-3 pb-2">
-                    <a href="/" class="block py-2 hover:text-blue-200 font-medium">
-                        <i class="fas fa-home mr-1"></i> Início
-                    </a>
-                    <a href="/transacoes" class="block py-2 hover:text-blue-200 font-medium">
-                        <i class="fas fa-exchange-alt mr-1"></i> Transações
-                    </a>
-                    <a href="/ia-agent" class="block py-2 hover:text-blue-200 font-medium">
-                        <i class="fas fa-robot mr-1"></i> Assistente IA
-                    </a>
-                </div>
-            </div>
-        </nav>
+  <div class="flex flex-col min-h-screen">
+    <!-- Navbar -->
+    <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
+      <div class="container mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-2">
+            <i class="fas fa-wallet text-2xl"></i>
+            <h1 class="text-xl font-bold">Gerenciador de Finanças</h1>
+          </div>
+          <div class="hidden md:flex space-x-6">
+            <a href="/" class="hover:text-blue-200 font-medium flex items-center"><i class="fas fa-home mr-1"></i> Início</a>
+            <a href="/transacoes" class="hover:text-blue-200 font-medium flex items-center"><i class="fas fa-exchange-alt mr-1"></i> Transações</a>
+            <a href="/ia-agent" class="hover:text-blue-200 font-medium flex items-center"><i class="fas fa-robot mr-1"></i> Assistente IA</a>
+          </div>
+          <div class="md:hidden">
+            <button id="mobile-menu-button" class="text-white focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+          </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden hidden mt-3 pb-2">
+          <a href="/" class="block py-2 hover:text-blue-200">Início</a>
+          <a href="/transacoes" class="block py-2 hover:text-blue-200">Transações</a>
+          <a href="/ia-agent" class="block py-2 hover:text-blue-200">Assistente IA</a>
+        </div>
+      </div>
+    </nav>
 
-        <!-- Main Content -->
-        <main class="flex-grow container mx-auto px-4 py-8">
-            <!-- Dashboard Header -->
-            <div class="mb-8 text-center">
-                <h2 class="text-3xl font-bold text-gray-800 mb-2">Bem-vindo ao seu Gerenciador Financeiro</h2>
-                <p class="text-gray-600">Acompanhe, analise e gerencie suas finanças de forma simples e eficiente.</p>
-            </div>
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+      <!-- Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-lg shadow border-l-4 border-blue-500">
+          <p class="text-sm text-gray-500">Saldo Total</p>
+          <p id="balance" class="text-2xl font-bold text-gray-800">R$ 0,00</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow border-l-4 border-green-500">
+          <p class="text-sm text-gray-500">Receitas</p>
+          <p id="income" class="text-2xl font-bold text-green-600">R$ 0,00</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow border-l-4 border-red-500">
+          <p class="text-sm text-gray-500">Despesas</p>
+          <p id="expenses" class="text-2xl font-bold text-red-600">R$ 0,00</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow border-l-4 border-purple-500">
+          <p class="text-sm text-gray-500">Economia</p>
+          <p id="savings" class="text-2xl font-bold text-purple-600">R$ 0,00</p>
+        </div>
+      </div>
 
-            <!-- Financial Summary Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <!-- Balance Card -->
-                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500 transform transition-transform hover:scale-105">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Saldo Total</p>
-                            <p id="balance" class="text-2xl font-bold text-gray-800">R$ 0,00</p>
-                        </div>
-                        <div class="bg-blue-100 p-3 rounded-full">
-                            <i class="fas fa-wallet text-blue-500"></i>
-                        </div>
-                    </div>
-                </div>
+      <!-- Quick Actions -->
+      <div class="bg-white p-6 rounded-lg shadow mb-8">
+        <h3 class="text-xl font-bold mb-4">Ações Rápidas</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <a href="/transacoes" class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg p-4 text-center">
+            <i class="fas fa-plus-circle text-2xl mb-2"></i>
+            <p>Nova Transação</p>
+          </a>
+          <a href="#" class="bg-green-500 hover:bg-green-600 text-white rounded-lg p-4 text-center">
+            <i class="fas fa-chart-line text-2xl mb-2"></i>
+            <p>Ver Relatórios</p>
+          </a>
+          <a href="#" class="bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg p-4 text-center">
+            <i class="fas fa-robot text-2xl mb-2"></i>
+            <p>Consultar IA</p>
+          </a>
+        </div>
+      </div>
 
-                <!-- Income Card -->
-                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500 transform transition-transform hover:scale-105">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Receitas</p>
-                            <p id="income" class="text-2xl font-bold text-green-600">R$ 0,00</p>
-                        </div>
-                        <div class="bg-green-100 p-3 rounded-full">
-                            <i class="fas fa-arrow-up text-green-500"></i>
-                        </div>
-                    </div>
-                </div>
+      <!-- Goals Section -->
+      <div class="bg-white p-6 rounded-lg shadow mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold">Metas (Despesas)</h3>
+          <button id="edit-goals-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">Editar Metas</button>
+        </div>
+        <div id="goals-container" class="space-y-6">
+          <!-- Goal bars injected via JS -->
+        </div>
+      </div>
+    </main>
 
-                <!-- Expenses Card -->
-                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500 transform transition-transform hover:scale-105">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Despesas</p>
-                            <p id="expenses" class="text-2xl font-bold text-red-600">R$ 0,00</p>
-                        </div>
-                        <div class="bg-red-100 p-3 rounded-full">
-                            <i class="fas fa-arrow-down text-red-500"></i>
-                        </div>
-                    </div>
-                </div>
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-6">
+      <div class="container mx-auto px-4 text-center">
+        &copy; 2025 Gerenciador de Finanças
+      </div>
+    </footer>
 
-                <!-- Savings Card -->
-                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500 transform transition-transform hover:scale-105">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Economia</p>
-                            <p id="savings" class="text-2xl font-bold text-purple-600">R$ 0,00</p>
-                        </div>
-                        <div class="bg-purple-100 p-3 rounded-full">
-                            <i class="fas fa-piggy-bank text-purple-500"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">Ações Rápidas</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    <a href="/transacoes" class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg p-4 text-center transition-colors">
-                        <i class="fas fa-plus-circle text-2xl mb-2"></i>
-                        <p class="font-medium">Nova Transação</p>
-                    </a>
-                    <a href="#" class="bg-green-500 hover:bg-green-600 text-white rounded-lg p-4 text-center transition-colors">
-                        <i class="fas fa-chart-line text-2xl mb-2"></i>
-                        <p class="font-medium">Ver Relatórios</p>
-                    </a>
-                    <a href="#" class="bg-purple-500 hover:bg-purple-600 text-white rounded-lg p-4 text-center transition-colors">
-                        <i class="fas fa-bullseye text-2xl mb-2"></i>
-                        <p class="font-medium">Definir Metas</p>
-                    </a>
-                    <a href="/ia-agent" class="bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg p-4 text-center transition-colors">
-                        <i class="fas fa-robot text-2xl mb-2"></i>
-                        <p class="font-medium">Consultar IA</p>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Recent Transactions Preview (permanece estático ou pode ser removido) -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Transações Recentes</h3>
-                    <a href="/transacoes" class="text-blue-500 hover:text-blue-700 font-medium flex items-center">
-                        Ver todas <i class="fas fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
-                <!-- Você pode manter como exemplo estático ou removê-lo -->
-            </div>
-        </main>
-
-        <!-- Footer -->
-        <footer class="bg-gray-800 text-white py-6">
-            <div class="container mx-auto px-4">
-                <div class="flex flex-col md:flex-row justify-between items-center">
-                    <div class="mb-4 md:mb-0">
-                        <h3 class="text-lg font-bold mb-2">Gerenciador de Finanças</h3>
-                        <p class="text-gray-400 text-sm">Controle suas finanças de forma simples e eficiente.</p>
-                    </div>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="mt-6 border-t border-gray-700 pt-6 text-center text-gray-400 text-sm">
-                    &copy; 2025 Gerenciador de Finanças. Todos os direitos reservados.
-                </div>
-            </div>
-        </footer>
-    </div>
-
+    <!-- Scripts -->
     <script src="/static/js/scripts.js"></script>
     <script>
       async function updateCards() {
-        const rows = await fetch("https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%C3%A1gina3").then(r => r.json());
-        let totalIncome = 0, totalExpenses = 0;
-        rows.forEach(r => {
-          const num = parseFloat(r.Valor.replace("R$", "").replace(".", "").replace(",", ".").trim());
-          if (r.Tipo === "Receita") totalIncome += num;
-          else totalExpenses += num;
+        const rows = await fetch('https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%25C3%25A1gina3').then(r => r.json());
+        let totalIncome=0, totalExpenses=0;
+        rows.forEach(r=>{
+          const num=parseFloat(r.Valor.replace(/R\$|\./g,'').replace(',','.'));
+          r.Tipo==='Receita'?totalIncome+=num:totalExpenses+=num;
         });
-        const balance = totalIncome - totalExpenses;
-        document.getElementById("income").innerText    = `R$ ${totalIncome.toFixed(2).replace(".", ",")}`;
-        document.getElementById("expenses").innerText  = `R$ ${totalExpenses.toFixed(2).replace(".", ",")}`;
-        document.getElementById("balance").innerText   = `R$ ${balance.toFixed(2).replace(".", ",")}`;
-        document.getElementById("savings").innerText   = `R$ ${(totalIncome * 0.1).toFixed(2).replace(".", ",")}`;
+        document.getElementById('income').innerText=`R$ ${totalIncome.toFixed(2).replace('.',',')}`;
+        document.getElementById('expenses').innerText=`R$ ${totalExpenses.toFixed(2).replace('.',',')}`;
+        document.getElementById('balance').innerText=`R$ ${(totalIncome-totalExpenses).toFixed(2).replace('.',',')}`;
+        document.getElementById('savings').innerText=`R$ ${(totalIncome*0.1).toFixed(2).replace('.',',')}`;
       }
-      document.addEventListener("DOMContentLoaded", updateCards);
+      // Goals
+      let sums={}, goals={};
+      async function loadSums(){
+        const rows=await fetch('https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%25C3%25A1gina3').then(r=>r.json());
+        sums={}; rows.filter(r=>r.Tipo==='Despesa').forEach(r=>{
+          const num=parseFloat(r.Valor.replace(/R\$|\./g,'').replace(',','.'));
+          sums[r.Categoria]=(sums[r.Categoria]||0)+num;
+        });
+      }
+      function renderGoals(){
+        const c=document.getElementById('goals-container'); c.innerHTML='';
+        Object.entries(goals).forEach(([cat,goal])=>{
+          const spent=sums[cat]||0;
+          const pct=goal?Math.min((spent/goal)*100,100):0;
+          const wrapper=document.createElement('div');
+          wrapper.innerHTML=`
+            <div class="flex justify-between text-sm mb-1">
+              <span>${cat}: ${pct.toFixed(0)}% (${spent.toFixed(2).replace('.',',')}/${goal})</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-4">
+              <div class="h-4 bg-blue-600 rounded-full" style="width:${pct}%"></div>
+            </div>`;
+          c.appendChild(wrapper);
+        });
+      }
+      document.getElementById('edit-goals-btn').addEventListener('click',()=>{
+        const m=document.createElement('div');
+        // modal omitted for brevity
+        alert('Implement modal edição de metas');
+      });
+      document.addEventListener('DOMContentLoaded',async()=>{
+        await updateCards();
+        await loadSums();
+        Object.keys(sums).forEach(cat=>goals[cat]=sums[cat]);
+        renderGoals();
+      });
     </script>
 </body>
 </html>
