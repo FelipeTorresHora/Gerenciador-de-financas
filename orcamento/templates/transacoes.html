@@ -58,7 +58,7 @@
                     <option value="delete">Deletar uma transação</option>
                 </select>
 
-                <form id="sheet-form">
+                <form id="transaction-form"> 
                     {% csrf_token %}
                     <input type="hidden" name="action" id="action-input" value="add" />
                     <input type="hidden" name="Id" id="id-input" />
@@ -87,7 +87,7 @@
                   const form = document.getElementById('sheet-form');
                   const actionInput = document.getElementById('action-input');
                   const idInput = document.getElementById('id-input');
-                  const sheetApiUrl = 'https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%25C3%25A1gina3';
+                  const sheetApiUrl = 'https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%C3%A1gina3';
 
                   // Preenche Id para add
                   async function setNextId() {
