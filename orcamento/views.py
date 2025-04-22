@@ -1,22 +1,51 @@
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 import json
 import logging
+from  orcamento.ia.agent import DeepSeekAgent
 from sheet2api import Sheet2APIClient
-from django.views.decorators.csrf import csrf_exempt
-from calendar import monthrange
-from orcamento.ia.agent import DeepSeekAgent
+from django.views.decorators.csrf import csrf_exempt, csrf_protect 
 
 logger = logging.getLogger(__name__)
-
 
 def index(request):
     return render(request, "index.html")
 
-
 def transacoes(request):
-    return render(request, "transacoes.html")
-
+    try:
+        client = Sheet2APIClient(
+            api_url="https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%25C3%25A1gina3"
+        )
+        rows = client.get_rows()
+        
+        # Processar os dados para o formato especificado
+        transactions = []
+        for row in rows:
+            try:
+                if not all(key in row for key in ["Data", "Tipo", "Valor", "Categoria"]):
+                    continue
+                    
+                transactions.append({
+                    "Valor": row["Valor"],  # Manter o formato exato, ex.: "R$ 699,00"
+                    "Categoria": row["Categoria"],
+                    "Data": row["Data"],  # Ex.: "06/02/2025"
+                    "Tipo": row["Tipo"],
+                    "Descricao": row.get("Descricao", "Sem descrição"),
+                    "Observacoes": row.get("Observacoes", "")
+                })
+            except Exception as e:
+                logger.error(f"Erro ao processar linha: {str(e)}")
+                continue
+                
+        context = {
+            "transactions": json.dumps(transactions)  # Passar como JSON para o frontend
+        }
+        
+        return render(request, "transacoes.html", context)
+        
+    except Exception as e:
+        logger.error(f"Erro ao carregar transações: {str(e)}")
+        return render(request, "transacoes.html", {"error": str(e)})
 
 @csrf_exempt
 def save_expense(request):
@@ -32,13 +61,16 @@ def save_expense(request):
                         {"message": f"Campo {field} é obrigatório"}, status=400
                     )
 
-            # Validação do valor
+            # Validação do valor (remover "R$" para verificar, mas salvar com "R$")
             try:
-                valor = float(data["Valor"])
+                valor_str = data["Valor"].replace("R$", "").replace(".", "").replace(",", ".").strip()
+                valor = float(valor_str)
                 if valor < 0:
                     return JsonResponse(
                         {"message": "O valor não pode ser negativo"}, status=400
                     )
+                # Reformatar o valor para o formato brasileiro com "R$"
+                data["Valor"] = f"R$ {valor:,.2f}".replace(".", ",")
             except ValueError:
                 return JsonResponse({"message": "Valor inválido"}, status=400)
 
@@ -56,99 +88,58 @@ def save_expense(request):
 
     return JsonResponse({"message": "Método não permitido"}, status=405)
 
-
-def update_chart(request):
-    try:
-        month = request.GET.get("month")
-        year = request.GET.get("year")
-
+@csrf_exempt
+def delete_transaction(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
         client = Sheet2APIClient(
             api_url="https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%25C3%25A1gina3"
         )
-        rows = client.get_rows()
+        if action == 'add':
+            data = {
+                'Id': request.POST.get('Id'),
+                'Valor': request.POST.get('Valor'),
+                'Categoria': request.POST.get('Categoria'),
+                'Data': request.POST.get('Data'),
+                'Tipo': request.POST.get('Tipo')
+            }
+            client.create_row(data)
+        elif action == 'delete':
+            id_to_delete = request.POST.get('Id')
+            rows = client.get_rows()
+            for i, row in enumerate(rows):
+                if str(row.get('Id')) == str(id_to_delete):
+                    client.update_row(i + 2, {})
+                    break
+        return redirect('transacoes')
+    return redirect('transacoes')
 
-        daily_data = {}
-        category_data = {}
-        monthly_total = 0
+@csrf_exempt
+def manage_transaction(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        client = Sheet2APIClient(
+            api_url="https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%25C3%25A1gina3"
+        )
+        if action == 'add':
+            data = {
+                'Id': request.POST.get('Id'),
+                'Valor': request.POST.get('Valor'),
+                'Categoria': request.POST.get('Categoria'),
+                'Data': request.POST.get('Data'),
+                'Tipo': request.POST.get('Tipo')
+            }
+            client.create_row(data)
+        elif action == 'delete':
+            id_to_delete = request.POST.get('Id')
+            rows = client.get_rows()
+            for i, row in enumerate(rows):
+                if str(row.get('Id')) == str(id_to_delete):
+                    client.update_row(i + 1, {})  # Ajustado: i+1 pois o índice da linha é relativo, mesmo Id estando na coluna 5
+                    break
+        return redirect('transacoes')
+    return redirect('transacoes')
 
-        for row in rows:
-            try:
-                if not all(key in row for key in ["Data", "Tipo", "Valor", "Categoria"]):
-                    continue
-
-                # Corrigido: Split por '-' para datas no formato DD-MM-YYYY
-                date_str = row["Data"]
-                day, month_data, year_data = date_str.split("/")
-
-                # Filtro por mês/ano
-                if month and year:
-                    if int(month_data) != int(month) or int(year_data) != int(year):
-                        continue
-
-                tipo = row["Tipo"].strip().lower()
-                if tipo in ["receita", "receitas"]:
-                    tipo = "Receita"
-                elif tipo in ["despesa", "despesas"]:
-                    tipo = "Despesa"
-                else:
-                    continue
-
-                valor_str = (
-                    row["Valor"]
-                    .replace("R$", "")
-                    .replace(".", "")
-                    .replace(",", ".")
-                    .strip()
-                )
-                valor = float(valor_str)
-
-                # Formato da chave mantido como DD/MM/YYYY
-                date_key = f"{day}/{month_data}/{year_data}"
-                if date_key not in daily_data:
-                    daily_data[date_key] = {"Despesa": 0, "Receita": 0}
-                daily_data[date_key][tipo] += valor
-
-                if tipo == "Despesa":
-                    category = row["Categoria"]
-                    category_data[category] = category_data.get(category, 0) + valor
-
-                if tipo == "Receita":
-                    monthly_total += valor
-
-            except Exception as e:
-                logger.error(f"Erro na linha {row}: {str(e)}")
-                continue
-
-        # Movido para fora do loop: Preenchimento dos dias do mês
-        if month and year:
-            _, last_day = monthrange(int(year), int(month))
-            ordered_daily = {}
-            for day in range(1, last_day + 1):
-                # Formata dia e mês com dois dígitos
-                formatted_day = f"{day:02d}"
-                formatted_month = f"{int(month):02d}"
-                date_key = f"{formatted_day}/{formatted_month}/{year}"
-                ordered_daily[date_key] = daily_data.get(
-                    date_key, {"Despesa": 0, "Receita": 0}
-                )
-            daily_data = ordered_daily
-        else:
-            sorted_dates = sorted(
-                daily_data.keys(),
-                key=lambda x: tuple(map(int, x.split("/")[::-1]))
-            )
-            daily_data = {date: daily_data[date] for date in sorted_dates}
-
-        return JsonResponse({
-            "daily": daily_data,
-            "categories": category_data,
-            "monthly_total": monthly_total
-        })
-
-    except Exception as e:
-        logger.error(f"Erro geral: {str(e)}")
-        return JsonResponse({"message": "Erro ao buscar dados"}, status=500)
-    
 @csrf_exempt
 def ia_agent(request):
     if request.method == "POST":

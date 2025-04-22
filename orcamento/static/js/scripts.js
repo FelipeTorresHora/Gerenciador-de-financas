@@ -1,203 +1,138 @@
-// Referências aos elementos
-const tableBody = document.querySelector("#expensesTable tbody");
-const addRowButton = document.getElementById("add-row");
-const saveButton = document.getElementById("save-table");
-const updateChartButton = document.getElementById("update-chart");
-const percentFormatter = new Intl.NumberFormat('pt-BR', {
-    style: 'percent',
-    maximumFractionDigits: 2
+// URL base da sua Sheet2API
+const SHEET2_BASE = "https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%C3%A1gina3";
+
+// Manipulação do formulário de transação
+const transactionForm = document.getElementById('transaction-form');
+
+if (transactionForm) {
+  transactionForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const tipo = document.querySelector('input[name="transaction-type"]:checked').value === 'income' ? 'Receita' : 'Despesa';
+    const descricao = document.getElementById('description').value;
+    const valor = parseFloat(document.getElementById('amount').value);
+    const categoria = document.getElementById('category').value;
+    const data = document.getElementById('date').value;
+    const notas = document.getElementById('notes').value;
+
+    if (!descricao || !valor || !categoria || !data) {
+      alert('Por favor, preencha todos os campos obrigatórios');
+      return;
+    }
+
+    const [ano, mes, dia] = data.split('-');
+    const dataFormatada = `${dia}/${mes}/${ano}`;
+    const valorFormatado = `R$ ${valor.toFixed(2).replace('.', ',')}`;
+
+    try {
+      const res = await fetch(SHEET2_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          Valor: valorFormatado,
+          Categoria: categoria,
+          Data: dataFormatada,
+          Tipo: tipo
+        })
+      });
+      if (!res.ok) throw new Error();
+      alert('Transação salva com sucesso!');
+      document.getElementById('transaction-modal').classList.add('hidden');
+      transactionForm.reset();
+      loadTransactions();
+    } catch {
+      alert('Erro ao salvar transação.');
+    }
+  });
+}
+
+// Busca todas as transações da planilha
+async function fetchTransactions() {
+  const res = await fetch(SHEET2_BASE);
+  if (!res.ok) throw new Error('Erro ao buscar transações');
+  return res.json();
+}
+
+// Atualiza a tabela de transações
+async function loadTransactions() {
+  const tbody = document.querySelector('#transaction-table tbody');
+  tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">Carregando...</td></tr>';
+
+  let rows;
+  try {
+    rows = await fetchTransactions();
+  } catch {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-red-600">Falha ao carregar</td></tr>';
+    return;
+  }
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">Nenhuma transação</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '';
+  rows.forEach(row => {
+    const isIncome    = row.Tipo === 'Receita';
+    const valueClass  = isIncome ? 'text-green-600' : 'text-red-600';
+    const valuePrefix = isIncome ? '+ ' : '- ';
+    const catClass    = isIncome ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+
+    tbody.innerHTML += `
+      <tr class="hover:bg-gray-50">
+        <td class="px-6 py-4"><div class="text-sm font-medium">${row.Descricao||'—'}</div></td>
+        <td class="px-6 py-4"><span class="px-2 inline-flex text-xs font-semibold rounded-full ${catClass}">${row.Categoria||'—'}</span></td>
+        <td class="px-6 py-4 text-sm text-gray-500">${row.Data}</td>
+        <td class="px-6 py-4 text-sm text-right font-medium ${valueClass}">${valuePrefix}${row.Valor}</td>
+        <td class="px-6 py-4 text-right text-sm">
+          <button class="delete-transaction" data-row="${row.__rowNum__}" data-valor="${row.Valor}" data-categoria="${row.Categoria}" data-data="${row.Data}" data-tipo="${row.Tipo}">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </td>
+      </tr>`;
+  });
+
+  document.querySelectorAll('.delete-transaction').forEach(btn => {
+    btn.onclick = async () => {
+      if (!confirm('Tem certeza que deseja excluir esta transação?')) return;
+      const payload = {
+        Valor:     btn.dataset.valor,
+        Categoria: btn.dataset.categoria,
+        Data:      btn.dataset.data,
+        Tipo:      btn.dataset.tipo
+      };
+      const res = await fetch(`${SHEET2_BASE}/${btn.dataset.row}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        alert('Transação excluída com sucesso!');
+        loadTransactions();
+      } else {
+        alert('Erro ao excluir transação.');
+      }
+    };
+  });
+}
+
+// Inicia a carga de dados quando a página estiver pronta
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.querySelector('#transaction-table')) {
+    loadTransactions();
+  }
 });
 
-
-function addRow() {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-        <td><input type="date" class="form-control"></td>
-        <td><input type="text" class="form-control"></td>
-        <td><input type="text" class="form-control"></td>
-        <td><input type="number" class="form-control" min="0"></td>
-        <td><button class="btn btn-danger btn-sm delete-row">Excluir</button></td>
-    `;
-    tableBody.appendChild(row);
-}
-
-
-function deleteRow(event) {
-    if (event.target.classList.contains("delete-row")) {
-        event.target.closest("tr").remove();
+actionSelect.addEventListener('change', (e) => {
+    const actionInput = document.getElementById('action-input');
+    if (e.target.value === 'delete') {
+      addFields.classList.add('hidden');
+      deleteField.classList.remove('hidden');
+      actionInput.value = 'delete';
+    } else {
+      deleteField.classList.add('hidden');
+      addFields.classList.remove('hidden');
+      actionInput.value = 'add';
     }
-}
-
-function saveTable() {
-    const rows = tableBody.querySelectorAll("tr");
-    const data = [];
-
-    rows.forEach((row) => {
-        const cells = row.querySelectorAll("input");
-        const rowData = {
-            date: cells[0].value,
-            description: cells[1].value,
-            category: cells[2].value,
-            value: parseFloat(cells[3].value) || 0,
-        };
-
-        // Validação para impedir valores negativos
-        if (rowData.value < 0) {
-            alert("Os valores não podem ser negativos.");
-            return;
-        }
-
-        data.push(rowData);
-    });
-
-    // Enviar dados para o backend
-    fetch("/save/", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCSRFToken(),
-        },
-        body: JSON.stringify({ expenses: data }),
-    }).then((response) => {
-        if (response.ok) {
-            alert("Tabela salva com sucesso!");
-        } else {
-            alert("Erro ao salvar tabela.");
-        }
-    });
-}
-
-function updateChart() {
-    fetch("/update-chart/")
-        .then((response) => response.json())
-        .then((data) => {
-            const chart = Chart.getChart("budgetChart");
-            if (chart) {
-                chart.destroy();
-            }
-
-            const ctx = document.getElementById("budgetChart").getContext("2d");
-            new Chart(ctx, {
-                type: "bar", // Tipo de gráfico
-                data: {
-                    labels: data.categories, // Categorias no eixo X
-                    datasets: [
-                        {
-                            label: "Gastos", // Legenda do dataset
-                            data: data.values, // Valores no eixo Y
-                            backgroundColor: ["#ff6384", "#36a2eb", "#cc65fe", "#ffce56", "#4bc0c0"], // Cores das barras
-                            borderColor: ["#ff6384", "#36a2eb", "#cc65fe", "#ffce56", "#4bc0c0"], // Cores das bordas
-                            borderWidth: 1, // Largura da borda
-                        },
-                    ],
-                },
-                options: {
-                    responsive: false, // Torna o gráfico responsivo
-                    maintainAspectRatio: false, // Permite que o gráfico redimensione livremente
-                    width: 600,
-                    height: 400,
-                    plugins: {
-                        legend: {
-                            display: true, // Exibe a legenda
-                            position: "top", // Posição da legenda
-                        },
-                        tooltip: {
-                            enabled: true, // Ativa tooltips
-                            callbacks: {
-                                label: function (context) {
-                                    return `Valor: ${context.raw.toLocaleString("pt-BR", {
-                                        style: "currency",
-                                        currency: "BRL",
-                                    })}`; // Formata o valor em Reais (BRL)
-                                },
-                            },
-                        },
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true, // Começa o eixo Y do zero
-                            ticks: {
-                                callback: function (value) {
-                                    return value.toLocaleString("pt-BR", {
-                                        style: "currency",
-                                        currency: "BRL",
-                                    }); // Formata os valores do eixo Y em Reais (BRL)
-                                },
-                            },
-                        },
-                    },
-                },
-            });
-        })
-        .catch((error) => {
-            console.error("Erro ao atualizar gráfico:", error);
-            alert("Erro ao carregar dados do gráfico.");
-        });
-}
-
-function updateMetrics(data) {
-    // Atualizar novas métricas
-    const profitElement = document.getElementById('monthlyProfit');
-    const profitTrend = document.getElementById('profitTrend');
-    profitElement.textContent = currencyFormatter.format(data.monthly_profit || 0);
-    profitTrend.innerHTML = data.monthly_profit >= 0 ? 
-        '<span class="text-success">↑</span>' : 
-        '<span class="text-danger">↓</span>';
-
-    document.getElementById('savingsPercent').textContent = 
-        percentFormatter.format((data.savings_percent || 0)/100);
-    
-    document.getElementById('totalInvested').textContent = 
-        currencyFormatter.format(data.total_invested || 0);
-
-    // Renderizar novo gráfico
-    renderBalanceChart(data.accumulated_balance);
-}
-
-function renderBalanceChart(data) {
-    const ctx = document.getElementById('balanceChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: Object.keys(data),
-            datasets: [{
-                label: 'Saldo Acumulado',
-                data: Object.values(data),
-                borderColor: '#10B981',
-                tension: 0.4,
-                fill: true,
-                backgroundColor: 'rgba(16, 185, 129, 0.1)'
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => currencyFormatter.format(ctx.raw)
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    ticks: {
-                        callback: (value) => currencyFormatter.format(value)
-                    }
-                }
-            }
-        }
-    });
-}
-
-function getCSRFToken() {
-    return document.querySelector("[name=csrfmiddlewaretoken]").value;
-}
-
-// Event Listeners
-addRowButton.addEventListener("click", addRow);
-tableBody.addEventListener("click", deleteRow);
-saveButton.addEventListener("click", saveTable);
-updateChartButton.addEventListener("click", updateChart);
-document.addEventListener("DOMContentLoaded", updateChart);
-
+  });
+  
