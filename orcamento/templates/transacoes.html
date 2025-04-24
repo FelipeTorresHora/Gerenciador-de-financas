@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -5,156 +6,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transações - Gerenciador de Finanças</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <div class="flex flex-col min-h-screen">
-        <!-- Navbar -->
-        <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
-            <div class="container mx-auto px-4 py-3">
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center space-x-2">
-                        <i class="fas fa-wallet text-2xl"></i>
-                        <h1 class="text-xl font-bold">Gerenciador de Finanças</h1>
-                    </div>
-                    <div class="hidden md:flex space-x-6">
-                        <a href="/" class="hover:text-blue-200 font-medium flex items-center">
-                            <i class="fas fa-home mr-1"></i> Início
-                        </a>
-                        <a href="/transacoes" class="text-blue-200 font-medium flex items-center border-b-2 border-blue-200 pb-1">
-                            <i class="fas fa-exchange-alt mr-1"></i> Transações
-                        </a>
-                    </div>
-                    <div class="md:hidden">
-                        <button id="mobile-menu-button" class="text-white focus:outline-none">
-                            <i class="fas fa-bars text-xl"></i>
-                        </button>
-                    </div>
-                </div>
-                <!-- Mobile Menu -->
-                <div id="mobile-menu" class="md:hidden hidden mt-3 pb-2">
-                    <a href="/" class="block py-2 hover:text-blue-200 font-medium">
-                        <i class="fas fa-home mr-1"></i> Início
-                    </a>
-                    <a href="/transacoes" class="block py-2 text-blue-200 font-medium">
-                        <i class="fas fa-exchange-alt mr-1"></i> Transações
-                    </a>
-                </div>
-            </div>
-        </nav>
+  <div class="flex flex-col min-h-screen">
+    <!-- Navbar -->
+    <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
+      <div class="container mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-2">
+            <i class="fas fa-wallet text-2xl"></i>
+            <h1 class="text-xl font-bold">Gerenciador de Finanças</h1>
+          </div>
+          <div class="hidden md:flex space-x-6">
+            <a href="/" class="hover:text-blue-200 font-medium flex items-center"><i class="fas fa-home mr-1"></i> Início</a>
+            <a href="/transacoes" class="text-blue-200 font-medium flex items-center border-b-2 border-blue-200 pb-1"><i class="fas fa-exchange-alt mr-1"></i> Transações</a>
+          </div>
+          <div class="md:hidden">
+            <button id="mobile-menu-button" class="text-white focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+          </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden hidden mt-3 pb-2">
+          <a href="/" class="block py-2 hover:text-blue-200 font-medium"><i class="fas fa-home mr-1"></i> Início</a>
+          <a href="/transacoes" class="block py-2 text-blue-200 font-medium"><i class="fas fa-exchange-alt mr-1"></i> Transações</a>
+        </div>
+      </div>
+    </nav>
 
-        <!-- Main Content -->
-        <main class="flex-grow container mx-auto px-4 py-8">
-            <!-- Page Header -->
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">Gerenciar Transações</h2>
-            </div>
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+      <!-- Page Header -->
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Gerenciar Transações</h2>
+      </div>
 
-            <!-- Adicionar/Deletar Transação -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <select id="action-select" class="mb-4 p-2 border border-gray-300 rounded-md">
-                    <option value="add">Adicionar Nova Transação</option>
-                    <option value="delete">Deletar uma transação</option>
-                </select>
+      <!-- Formulário de Transação -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <form id="transaction-form" action="{% url 'save_expense' %}" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="Id" id="id-input" value="">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <input type="text" name="Valor" id="amount" placeholder="Valor (ex.: 100,00)" class="rounded-md border-gray-300 p-2" required>
+            <input type="text" name="Categoria" id="category" placeholder="Categoria" class="rounded-md border-gray-300 p-2" required>
+            <input type="date" name="Data" id="date" class="rounded-md border-gray-300 p-2" required>
+            <select name="Tipo" id="transaction-type" class="rounded-md border-gray-300 p-2">
+              <option value="Receita">Receita</option>
+              <option value="Despesa">Despesa</option>
+            </select>
+          </div>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">Salvar Transação</button>
+        </form>
+      </div>
 
-                <form id="transaction-form"> 
-                    {% csrf_token %}
-                    <input type="hidden" name="action" id="action-input" value="add" />
-                    <input type="hidden" name="Id" id="id-input" />
+      <!-- Tabela Embutida de Transações -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <iframe src="https://sheet2api.com/table/iHLaXYEkR9GG/db-orcamento/P%25C3%25A1gina3" width="100%" height="600" frameborder="0" style="border: 1px solid #dedede; background: transparent;"></iframe>
+      </div>
+    </main>
 
-                    <!-- Campos de adição -->
-                    <div id="add-fields" class="flex space-x-4 mb-4">
-                        <input type="text" name="Valor" placeholder="Valor" class="flex-1 rounded-md border-gray-300 p-2" />
-                        <input type="text" name="Categoria" placeholder="Categoria" class="flex-1 rounded-md border-gray-300 p-2" />
-                        <input type="text" name="Data" placeholder="Data" class="flex-1 rounded-md border-gray-300 p-2" />
-                        <input type="text" name="Tipo" placeholder="Tipo" class="flex-1 rounded-md border-gray-300 p-2" />
-                    </div>
-
-                    <!-- Campo de delete -->
-                    <div id="delete-field" class="mb-4 hidden">
-                        <input type="text" name="Id" placeholder="Id da transação" class="w-full rounded-md border-gray-300 p-2" />
-                    </div>
-
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">Submit</button>
-                </form>
-
-                <!-- Script para alternar campos e atributos -->
-                <script>
-                  const actionSelect = document.getElementById('action-select');
-                  const addFields = document.getElementById('add-fields');
-                  const deleteField = document.getElementById('delete-field');
-                  const form = document.getElementById('sheet-form');
-                  const actionInput = document.getElementById('action-input');
-                  const idInput = document.getElementById('id-input');
-                  const sheetApiUrl = 'https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%C3%A1gina3';
-
-                  // Preenche Id para add
-                  async function setNextId() {
-                    const rows = await fetch(sheetApiUrl).then(r => r.json());
-                    const maxId = rows.reduce((max, r) => (r.Id && Number(r.Id) > max ? Number(r.Id) : max), 0);
-                    idInput.value = maxId + 1;
-                  }
-
-                  function updateForm() {
-                    if (actionSelect.value === 'delete') {
-                      addFields.classList.add('hidden');
-                      deleteField.classList.remove('hidden');
-                      form.setAttribute('action', '/manage-transaction/');
-                      form.setAttribute('method', 'post');
-                      form.removeAttribute('data-spreadsheet-api');
-                    } else {
-                      deleteField.classList.add('hidden');
-                      addFields.classList.remove('hidden');
-                      actionInput.value = 'add';
-                      form.setAttribute('data-spreadsheet-api', sheetApiUrl);
-                      form.removeAttribute('action');
-                      form.removeAttribute('method');
-                      setNextId();
-                    }
-                  }
-
-                  actionSelect.addEventListener('change', (e) => {
-                    actionInput.value = e.target.value;
-                    updateForm();
-                  });
-
-                  // Inicializa
-                  document.addEventListener('DOMContentLoaded', updateForm);
-                </script>
-                <script src="https://sheet2api.com/v1/template.js"></script>
-
-            <!-- Embedded Transactions Table -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <iframe src="https://sheet2api.com/table/iHLaXYEkR9GG/db-orcamento/P%25C3%25A1gina3"
-                        width="100%" height="600" frameborder="0"
-                        style="border: 1px solid #dedede; background: transparent;"></iframe>
-            </div>
-            </div>
-        </main>
-
-        <!-- Footer -->
-        <footer class="bg-gray-800 text-white py-6">
-            <div class="container mx-auto px-4">
-                <div class="flex flex-col md:flex-row justify-between items-center">
-                    <div class="mb-4 md:mb-0">
-                        <h3 class="text-lg font-bold mb-2">Gerenciador de Finanças</h3>
-                        <p class="text-gray-400 text-sm">Controle suas finanças de forma simples e eficiente.</p>
-                    </div>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-gray-400 hover=text-white transition-colors"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="text-gray-400 hover=text-white transition-colors"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
-                </div>
-                <div class="mt-6 border-t border-gray-700 pt-6 text-center text-gray-400 text-sm">
-                    © 2025 Gerenciador de Finanças. Todos os direitos reservados.
-                </div>
-            </div>
-        </footer>
-    </div>
-
-    <script src="/static/js/scripts.js"></script>
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-6">
+      <div class="container mx-auto px-4 text-center">
+        &copy; 2025 Gerenciador de Finanças
+      </div>
+    </footer>
+  </div>
+  <script src="{% static 'js/scripts.js' %}"></script>
 </body>
 </html>
