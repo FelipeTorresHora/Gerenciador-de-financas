@@ -237,3 +237,35 @@ def ia_agent(request):
     
     return render(request, "ia_agent.html")    
     
+@csrf_exempt
+def rag_advice(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            user_message = data.get('message', '')
+            
+            if not user_message:
+                return JsonResponse({'error': 'Mensagem vazia'}, status=400)
+            
+            # Recuperar transações
+            client = Sheet2APIClient(api_url="https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%C3%A1gina3")
+            rows = client.get_rows()
+            
+            # Calcular perfil financeiro
+            profile = calculate_financial_profile(rows)
+            
+            # Adicionar perfil ao agente
+            agent = GeminiAgent()
+            agent.add_financial_profile(profile)
+            
+            # Recuperar contexto e gerar resposta
+            context = agent.retrieve_context(user_message)
+            response = agent.get_investment_advice_with_context(user_message, context)
+            
+            return JsonResponse({'response': response})
+        
+        except Exception as e:
+            logger.error(f"Erro no RAG advice: {str(e)}")
+            return JsonResponse({'error': f"Erro interno: {str(e)}"}, status=500)
+    
+    return JsonResponse({'error': 'Método não permitido'}, status=405)    
