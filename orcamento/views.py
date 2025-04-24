@@ -3,7 +3,7 @@ import logging
 import requests
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from orcamento.ia.agent import DeepSeekAgent
+from orcamento.ia.agent import GeminiAgent
 from sheet2api import Sheet2APIClient
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
@@ -186,6 +186,36 @@ def manage_transaction(request):
         return redirect('transacoes')
     return redirect('transacoes')
 
+def calculate_financial_profile(rows):
+    """Calcula o perfil financeiro do usuário com base nas transações."""
+    saldo = 0
+    receitas = 0
+    despesas = 0
+    categorias = {}
+    
+    for row in rows:
+        try:
+            valor = float(row['Valor'].replace('R$', '').replace(',', '.').strip())
+            if row['Tipo'] == 'Receita':
+                receitas += valor
+            elif row['Tipo'] == 'Despesa':
+                despesas += valor
+                categorias[row['Categoria']] = categorias.get(row['Categoria'], 0) + valor
+        except (ValueError, KeyError):
+            continue
+    
+    saldo = receitas - despesas
+    economia = receitas * 0.1
+    top_categorias = [f"{cat} (R$ {val:.2f})" for cat, val in sorted(categorias.items(), key=lambda x: x[1], reverse=True)[:3]]
+    
+    return {
+        'saldo': f"R$ {saldo:,.2f}".replace('.', ','),
+        'receitas': f"R$ {receitas:,.2f}".replace('.', ','),
+        'despesas': f"R$ {despesas:,.2f}".replace('.', ','),
+        'economia': f"R$ {economia:,.2f}".replace('.', ','),
+        'categorias': ', '.join(top_categorias)
+    }
+  
 @csrf_exempt
 def ia_agent(request):
     if request.method == "POST":
@@ -196,7 +226,7 @@ def ia_agent(request):
             if not user_message:
                 return JsonResponse({'error': 'Mensagem vazia'}, status=400)
             
-            agent = DeepSeekAgent()
+            agent = GeminiAgent()
             response = agent.get_investment_advice(user_message)
             
             return JsonResponse({'response': response})
@@ -205,4 +235,37 @@ def ia_agent(request):
             logger.error(f"Erro no agente IA: {str(e)}")
             return JsonResponse({'error': 'Erro interno'}, status=500)
     
-    return render(request, "ia_agent.html")
+    return render(request, "ia_agent.html")    
+    
+@csrf_exempt
+def rag_advice(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            user_message = data.get('message', '')
+            
+            if not user_message:
+                return JsonResponse({'error': 'Mensagem vazia'}, status=400)
+            
+            # Recuperar transações
+            client = Sheet2APIClient(api_url="https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%C3%A1gina3")
+            rows = client.get_rows()
+            
+            # Calcular perfil financeiro
+            profile = calculate_financial_profile(rows)
+            
+            # Adicionar perfil ao agente
+            agent = GeminiAgent()
+            agent.add_financial_profile(profile)
+            
+            # Recuperar contexto e gerar resposta
+            context = agent.retrieve_context(user_message)
+            response = agent.get_investment_advice_with_context(user_message, context)
+            
+            return JsonResponse({'response': response})
+        
+        except Exception as e:
+            logger.error(f"Erro no RAG advice: {str(e)}")
+            return JsonResponse({'error': f"Erro interno: {str(e)}"}, status=500)
+    
+    return JsonResponse({'error': 'Método não permitido'}, status=405)    
