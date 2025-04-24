@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Finanças</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Estilos para o modal de edição de metas */
         #goals-modal-container {
           display: flex;
           position: fixed;
@@ -26,11 +30,6 @@
           -moz-appearance: textfield;
         }
     </style>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de Finanças</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50 min-h-screen">
   <div class="flex flex-col min-h-screen">
@@ -84,7 +83,7 @@
       <!-- Quick Actions -->
       <div class="bg-white p-6 rounded-lg shadow mb-8">
         <h3 class="text-xl font-bold mb-4">Ações Rápidas</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <a href="/transacoes" class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg p-4 text-center">
             <i class="fas fa-plus-circle text-2xl mb-2"></i>
             <p>Nova Transação</p>
@@ -93,7 +92,7 @@
             <i class="fas fa-chart-line text-2xl mb-2"></i>
             <p>Ver Relatórios</p>
           </a>
-          <a href="#" class="bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg p-4 text-center">
+          <a href="/ia-agent" class="bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg p-4 text-center">
             <i class="fas fa-robot text-2xl mb-2"></i>
             <p>Consultar IA</p>
           </a>
@@ -122,215 +121,215 @@
     <!-- Scripts -->
     <script src="/static/js/scripts.js"></script>
     <script>
-      async function updateCards() {
-        const rows = await fetch('https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%25C3%25A1gina3').then(r => r.json());
-        let totalIncome=0, totalExpenses=0;
-        rows.forEach(r=>{
-          const num=parseFloat(r.Valor.replace(/R\$|\./g,'').replace(',','.'));
-          r.Tipo==='Receita'?totalIncome+=num:totalExpenses+=num;
+      document.addEventListener('DOMContentLoaded', async () => {
+        // Inicializar menu móvel
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        if (mobileMenuButton) {
+          mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+          });
+        }
+
+        // Carregar dados financeiros
+        await updateCards();
+        
+        // Carregar metas salvas
+        try {
+          const savedGoals = localStorage.getItem('financialGoals');
+          if (savedGoals) {
+            goals = JSON.parse(savedGoals);
+          }
+        } catch (e) {
+          console.error("Erro ao carregar metas salvas:", e);
+          goals = {};
+        }
+        
+        // Carregar somas de despesas e renderizar metas
+        await loadSums();
+        
+        // Configurar metas iniciais se necessário
+        Object.keys(sums).forEach(categoria => {
+          if (!goals[categoria]) {
+            goals[categoria] = sums[categoria] || 0;
+          }
         });
-        document.getElementById('income').innerText=`R$ ${totalIncome.toFixed(2).replace('.',',')}`;
-        document.getElementById('expenses').innerText=`R$ ${totalExpenses.toFixed(2).replace('.',',')}`;
-        document.getElementById('balance').innerText=`R$ ${(totalIncome-totalExpenses).toFixed(2).replace('.',',')}`;
-        document.getElementById('savings').innerText=`R$ ${(totalIncome*0.1).toFixed(2).replace('.',',')}`;
+        
+        // Renderizar barras de progresso
+        renderGoals();
+        
+        // Configurar botão de editar metas
+        document.getElementById('edit-goals-btn').addEventListener('click', openGoalsModal);
+      });
+
+      // Variáveis globais
+      let sums = {}, goals = {};
+      const API_URL = 'https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%C3%A1gina3';
+
+      // Funções para manipulação de dados
+      async function updateCards() {
+        try {
+          const rows = await fetch(API_URL).then(r => r.json());
+          let totalIncome = 0, totalExpenses = 0;
+          
+          rows.forEach(r => {
+            const num = parseFloat(r.Valor.replace(/R\$|\./g, '').replace(',', '.'));
+            if (!isNaN(num)) {
+              r.Tipo === 'Receita' ? totalIncome += num : totalExpenses += num;
+            }
+          });
+          
+          const balance = totalIncome - totalExpenses;
+          const savings = totalIncome * 0.1;
+          
+          document.getElementById('income').innerText = formatCurrency(totalIncome);
+          document.getElementById('expenses').innerText = formatCurrency(totalExpenses);
+          document.getElementById('balance').innerText = formatCurrency(balance);
+          document.getElementById('savings').innerText = formatCurrency(savings);
+        } catch (error) {
+          console.error("Erro ao atualizar cards:", error);
+        }
       }
 
-    // Goals
-    let sums = {}, goals = {};
-    async function loadSums() {
-    try {
-        const rows = await fetch('https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%25C3%25A1gina3').then(r => r.json());
-        sums = {}; 
-        
-        // Filtrar apenas despesas e agrupar por categoria
-        rows.filter(r => r.Tipo === 'Despesa').forEach(r => {
-        const num = parseFloat(r.Valor.replace(/R\$|\./g, '').replace(',', '.'));
-        if (!isNaN(num)) {
-            sums[r.Categoria] = (sums[r.Categoria] || 0) + num;
+      async function loadSums() {
+        try {
+          const rows = await fetch(API_URL).then(r => r.json());
+          sums = {}; 
+          
+          // Filtrar apenas despesas e agrupar por categoria
+          rows.filter(r => r.Tipo === 'Despesa').forEach(r => {
+            const num = parseFloat(r.Valor.replace(/R\$|\./g, '').replace(',', '.'));
+            if (!isNaN(num)) {
+              sums[r.Categoria] = (sums[r.Categoria] || 0) + num;
+            }
+          });
+          
+          return sums;
+        } catch (error) {
+          console.error("Erro ao carregar dados de despesas:", error);
+          return {};
         }
-        });
-        
-        console.log("Sums loaded:", sums);
-        return sums;
-    } catch (error) {
-        console.error("Erro ao carregar dados de despesas:", error);
-        return {};
-    }
-    }
+      }
 
-    function renderGoals() {
-    const container = document.getElementById('goals-container'); 
-    container.innerHTML = '';
-    
-    // Se não temos categorias, mostrar mensagem
-    if (Object.keys(sums).length === 0) {
-        container.innerHTML = '<p class="text-gray-500">Nenhuma despesa encontrada</p>';
-        return;
-    }
-    
-    // Para cada categoria de despesa, criar uma barra de progresso
-    Object.entries(sums).forEach(([categoria, valor]) => {
-        // Se não temos uma meta para essa categoria, usar o valor atual como meta
-        const meta = goals[categoria] || valor;
-        const percentual = meta ? Math.min((valor / meta) * 100, 100) : 0;
+      function renderGoals() {
+        const container = document.getElementById('goals-container'); 
+        container.innerHTML = '';
         
-        // Determinar a cor da barra baseada no percentual
-        let barColor = 'bg-green-500';
-        if (percentual > 80) barColor = 'bg-red-500';
-        else if (percentual > 60) barColor = 'bg-yellow-500';
+        // Se não temos categorias, mostrar mensagem
+        if (Object.keys(sums).length === 0) {
+          container.innerHTML = '<p class="text-gray-500">Nenhuma despesa encontrada</p>';
+          return;
+        }
         
-        // Criar o elemento da barra
-        const goalElement = document.createElement('div');
-        goalElement.className = 'mb-4';
-        goalElement.innerHTML = `
-        <div class="flex justify-between text-sm mb-1">
-            <span class="font-medium">${categoria}</span>
-            <span class="text-gray-600">R$ ${valor.toFixed(2).replace('.', ',')} / R$ ${meta.toFixed(2).replace('.', ',')}</span>
-        </div>
-        <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-            <div class="h-4 ${barColor} rounded-full transition-all duration-500 ease-in-out" style="width: ${percentual}%"></div>
-        </div>
-        <div class="text-xs text-right mt-1 text-gray-500">${percentual.toFixed(0)}% utilizado</div>
+        // Para cada categoria de despesa, criar uma barra de progresso
+        Object.entries(sums).forEach(([categoria, valor]) => {
+          // Se não temos uma meta para essa categoria, usar o valor atual como meta
+          const meta = goals[categoria] || valor;
+          const percentual = meta > 0 ? Math.min((valor / meta) * 100, 100) : 0;
+          
+          // Determinar a cor da barra baseada no percentual
+          let barColor = 'bg-green-500';
+          if (percentual > 80) barColor = 'bg-red-500';
+          else if (percentual > 60) barColor = 'bg-yellow-500';
+          
+          // Criar o elemento da barra
+          const goalElement = document.createElement('div');
+          goalElement.className = 'mb-4';
+          goalElement.innerHTML = `
+            <div class="flex justify-between text-sm mb-1">
+              <span class="font-medium">${categoria}</span>
+              <span class="text-gray-600">${formatCurrency(valor)} / ${formatCurrency(meta)}</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+              <div class="h-4 ${barColor} rounded-full transition-all duration-500 ease-in-out" style="width: ${percentual}%"></div>
+            </div>
+            <div class="text-xs text-right mt-1 text-gray-500">${percentual.toFixed(0)}% utilizado</div>
+          `;
+          
+          container.appendChild(goalElement);
+        });
+      }
+
+      function openGoalsModal() {
+        // Criar modal overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'goals-modal-container';
+        
+        // Criar conteúdo do modal
+        const modal = document.createElement('div');
+        modal.className = 'bg-white rounded-lg shadow-xl p-6 w-full max-w-md';
+        
+        // Cabeçalho do modal
+        modal.innerHTML = `
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold">Editar Metas de Gastos</h3>
+            <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div id="goals-form" class="space-y-4">
+            <!-- Formulário gerado dinamicamente -->
+          </div>
+          <div class="mt-6 flex justify-end space-x-3">
+            <button id="cancel-goals" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">Cancelar</button>
+            <button id="save-goals" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded">Salvar</button>
+          </div>
         `;
         
-        container.appendChild(goalElement);
-    });
-    }
-
-    // Modal para edição de metas
-    function openGoalsModal() {
-    // Criar modal overlay
-    const overlay = document.createElement('div');
-    overlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center';
-    
-    // Criar conteúdo do modal
-    const modal = document.createElement('div');
-    modal.className = 'bg-white rounded-lg shadow-xl p-6 w-full max-w-md z-50';
-    
-    // Cabeçalho do modal
-    modal.innerHTML = `
-        <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold">Editar Metas de Gastos</h3>
-        <button id="close-modal" class="text-gray-500 hover:text-gray-700">
-            <i class="fas fa-times"></i>
-        </button>
-        </div>
-        <div id="goals-form" class="space-y-4">
-        <!-- Formulário gerado dinamicamente -->
-        </div>
-        <div class="mt-6 flex justify-end space-x-3">
-        <button id="cancel-goals" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">Cancelar</button>
-        <button id="save-goals" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded">Salvar</button>
-        </div>
-    `;
-    
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
-    
-    // Gerar campos do formulário
-    const form = modal.querySelector('#goals-form');
-    Object.entries(sums).forEach(([categoria, valor]) => {
-        const fieldGroup = document.createElement('div');
-        fieldGroup.innerHTML = `
-        <label class="block text-sm font-medium text-gray-700 mb-1">${categoria}</label>
-        <div class="flex items-center">
-            <span class="text-gray-500 mr-2">R$</span>
-            <input type="number" step="0.01" min="0" 
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+        
+        // Gerar campos do formulário
+        const form = modal.querySelector('#goals-form');
+        Object.entries(sums).forEach(([categoria, valor]) => {
+          const fieldGroup = document.createElement('div');
+          fieldGroup.innerHTML = `
+            <label class="block text-sm font-medium text-gray-700 mb-1">${categoria}</label>
+            <div class="flex items-center">
+              <span class="text-gray-500 mr-2">R$</span>
+              <input type="number" step="0.01" min="0" 
                 class="goal-input border rounded px-3 py-2 w-full" 
                 data-category="${categoria}" 
                 value="${(goals[categoria] || valor).toFixed(2)}">
-        </div>
-        `;
-        form.appendChild(fieldGroup);
-    });
-    
-    // Event listeners
-    const closeModal = () => {
-        document.body.removeChild(overlay);
-    };
-    
-    modal.querySelector('#close-modal').addEventListener('click', closeModal);
-    modal.querySelector('#cancel-goals').addEventListener('click', closeModal);
-    
-    modal.querySelector('#save-goals').addEventListener('click', () => {
-        // Salvar novas metas
-        const inputs = modal.querySelectorAll('.goal-input');
-        inputs.forEach(input => {
-        const categoria = input.dataset.category;
-        const valor = parseFloat(input.value);
-        if (!isNaN(valor) && valor >= 0) {
-            goals[categoria] = valor;
-        }
+            </div>
+          `;
+          form.appendChild(fieldGroup);
         });
         
-        // Salvar no localStorage para persistência
-        localStorage.setItem('financialGoals', JSON.stringify(goals));
+        // Event listeners
+        const closeModal = () => {
+          document.body.removeChild(overlay);
+        };
         
-        // Atualizar visualização
-        renderGoals();
-        closeModal();
-    });
-    }
-
-    // Inicialização
-    document.addEventListener('DOMContentLoaded', async () => {
-    // Atualizar informações dos cards
-    await updateCards();
-    
-    // Carregar metas salvas anteriormente
-    try {
-        const savedGoals = localStorage.getItem('financialGoals');
-        if (savedGoals) {
-        goals = JSON.parse(savedGoals);
-        }
-    } catch (e) {
-        console.error("Erro ao carregar metas salvas:", e);
-        goals = {};
-    }
-    
-    // Carregar somas de despesas e renderizar metas
-    await loadSums();
-    
-    // Se não houver metas definidas, usar os valores atuais como metas iniciais
-    Object.keys(sums).forEach(categoria => {
-        if (!goals[categoria]) {
-        goals[categoria] = sums[categoria] || 0;
-        }
-    });
-    
-    // Renderizar barras de progresso
-    renderGoals();
-    
-    // Adicionar evento ao botão de editar metas
-    document.getElementById('edit-goals-btn').addEventListener('click', openGoalsModal);
-    });
-      function renderGoals(){
-        const c=document.getElementById('goals-container'); c.innerHTML='';
-        Object.entries(goals).forEach(([cat,goal])=>{
-          const spent=sums[cat]||0;
-          const pct=goal?Math.min((spent/goal)*100,100):0;
-          const wrapper=document.createElement('div');
-          wrapper.innerHTML=`
-            <div class="flex justify-between text-sm mb-1">
-              <span>${cat}: ${pct.toFixed(0)}% (${spent.toFixed(2).replace('.',',')}/${goal})</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-4">
-              <div class="h-4 bg-blue-600 rounded-full" style="width:${pct}%"></div>
-            </div>`;
-          c.appendChild(wrapper);
+        modal.querySelector('#close-modal').addEventListener('click', closeModal);
+        modal.querySelector('#cancel-goals').addEventListener('click', closeModal);
+        
+        modal.querySelector('#save-goals').addEventListener('click', () => {
+          // Salvar novas metas
+          const inputs = modal.querySelectorAll('.goal-input');
+          inputs.forEach(input => {
+            const categoria = input.dataset.category;
+            const valor = parseFloat(input.value);
+            if (!isNaN(valor) && valor >= 0) {
+              goals[categoria] = valor;
+            }
+          });
+          
+          // Salvar no localStorage para persistência
+          localStorage.setItem('financialGoals', JSON.stringify(goals));
+          
+          // Atualizar visualização
+          renderGoals();
+          closeModal();
         });
       }
-      document.getElementById('edit-goals-btn').addEventListener('click',()=>{
-        const m=document.createElement('div');
-        // modal omitted for brevity
-        alert('Implement modal edição de metas');
-      });
-      document.addEventListener('DOMContentLoaded',async()=>{
-        await updateCards();
-        await loadSums();
-        Object.keys(sums).forEach(cat=>goals[cat]=sums[cat]);
-        renderGoals();
-      });
+
+      // Função utilitária para formatação de moeda
+      function formatCurrency(value) {
+        return `R$ ${value.toFixed(2).replace('.', ',')}`;
+      }
     </script>
+  </div>
 </body>
 </html>
