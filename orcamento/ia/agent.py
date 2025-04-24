@@ -34,6 +34,7 @@ class GeminiAgent:
         _, indices = self.index.search(np.array([query_embedding]), k=1)
         return self.documents[indices[0][0]] if indices[0][0] < len(self.documents) else {}
 
+
     def get_investment_advice_with_context(self, user_message, context):
         prompt = f'''
         Você é um especialista em finanças e investimentos. 
