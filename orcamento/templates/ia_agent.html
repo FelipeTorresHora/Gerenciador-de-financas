@@ -1,115 +1,113 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assistente de Investimentos</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body { background-color: #1a1a1a; color: #e0e0e0; }
-        .sidebar {
-            height: 100vh;
-            width: 250px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background-color: #343a40;
-            padding-top: 20px;
-        }
-        .sidebar a {
-            padding: 10px 15px;
-            text-decoration: none;
-            font-size: 18px;
-            color: #f8f9fa;
-            display: block;
-        }
-        .sidebar a:hover {
-            background-color: #495057;
-        }
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
-        }
-        .chat-container { max-width: 800px; margin: auto; }
-        .chat-message { 
-            background: #2d2d2d; 
-            border-radius: 15px;
-            padding: 1rem;
-            margin: 1rem 0;
-        }
-        .user-message { background: #3d3d3d; }
-        .bot-message { background: #2d2d2d; }
-        #chat-history { height: 70vh; overflow-y: auto; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assistente IA - Gerenciador de Finanças</title>
+  <!-- Tailwind CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-    <!-- Barra Lateral -->
-    <div class="sidebar">
-        <a href="{% url 'index' %}">Dashboard</a>
-        <a href="{% url 'transacoes' %}">Transações</a>
-        <a href="{% url 'ia_agent' %}" class="nav-link active">Assistente IA</a>
-    </div>
-
-    <!-- Conteúdo Principal -->
-    <div class="main-content">
-        <div class="container chat-container">
-            <h2 class="mb-4">Assistente Financeiro Inteligente</h2>
-            
-            <div id="chat-history" class="mb-3"></div>
-            
-            <div class="input-group">
-                <input type="text" id="user-input" class="form-control bg-dark text-light" 
-                       placeholder="Digite sua pergunta sobre investimentos...">
-                <button id="send-btn" class="btn btn-primary">Enviar</button>
-            </div>
+<body class="bg-gray-50 min-h-screen">
+  <div class="flex flex-col min-h-screen">
+    <!-- Navbar -->
+    <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
+      <div class="container mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-2">
+            <i class="fas fa-wallet text-2xl"></i>
+            <h1 class="text-xl font-bold">Gerenciador de Finanças</h1>
+          </div>
+          <div class="hidden md:flex space-x-6">
+            <a href="/" class="hover:text-blue-200 font-medium flex items-center"><i class="fas fa-home mr-1"></i> Início</a>
+            <a href="/transacoes" class="hover:text-blue-200 font-medium flex items-center"><i class="fas fa-exchange-alt mr-1"></i> Transações</a>
+            <a href="/ia-agent" class="text-blue-200 font-medium flex items-center border-b-2 border-blue-200 pb-1"><i class="fas fa-robot mr-1"></i> Assistente IA</a>
+          </div>
+          <div class="md:hidden">
+            <button id="mobile-menu-button" class="text-white focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+          </div>
         </div>
-    </div>
+        <div id="mobile-menu" class="md:hidden hidden mt-3 pb-2">
+          <a href="/" class="block py-2 hover:text-blue-200 font-medium"><i class="fas fa-home mr-1"></i> Início</a>
+          <a href="/transacoes" class="block py-2 hover:text-blue-200 font-medium"><i class="fas fa-exchange-alt mr-1"></i> Transações</a>
+          <a href="/ia-agent" class="block py-2 text-blue-200 font-medium"><i class="fas fa-robot mr-1"></i> Assistente IA</a>
+        </div>
+      </div>
+    </nav>
 
-    <script>
-        const chatHistory = document.getElementById('chat-history');
-        const userInput = document.getElementById('user-input');
-        
-        async function sendMessage() {
-            const message = userInput.value.trim();
-            if (!message) return;
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Assistente Financeiro Inteligente</h2>
+      <div id="chat-history" class="bg-white p-4 rounded-lg shadow h-96 overflow-y-auto mb-4">
+        <!-- Mensagens aparecerão aqui -->
+      </div>
+      <div class="flex">
+        <input type="text" id="user-input" class="flex-grow rounded-md border border-gray-300 p-2 mr-2" placeholder="Digite sua pergunta sobre investimentos...">
+        <button id="send-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">Enviar</button>
+      </div>
+    </main>
 
-            // Adiciona mensagem do usuário
-            chatHistory.innerHTML += `
-                <div class="chat-message user-message">
-                    <strong>Você:</strong><br>
-                    ${message}
-                </div>
-            `;
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-6">
+      <div class="container mx-auto px-4 text-center">
+        &copy; 2025 Gerenciador de Finanças
+      </div>
+    </footer>
+  </div>
 
-            // Resposta do bot
-            const botResponseDiv = document.createElement('div');
-            botResponseDiv.className = 'chat-message bot-message';
-            botResponseDiv.innerHTML = '<strong>Assistente:</strong><br>⌛ Processando...';
-            chatHistory.appendChild(botResponseDiv);
+  <!-- Scripts -->
+  <script src="{% static 'js/scripts.js' %}"></script>
+  <script>
+    // Mobile menu toggle
+    const mobileBtn = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileBtn) mobileBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
 
-            try {
-                const response = await fetch('/ia-agent/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: message })
-                });
+    // Chat functionality
+    const chatHistory = document.getElementById('chat-history');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
 
-                const data = await response.json();
-                botResponseDiv.innerHTML = `<strong>Assistente:</strong><br>${data.response}`;
-                
-            } catch (error) {
-                botResponseDiv.innerHTML = `<strong>Erro:</strong> ${error.message}`;
-            }
+    async function sendMessage() {
+      const message = userInput.value.trim();
+      if (!message) return;
 
-            userInput.value = '';
-            chatHistory.scrollTop = chatHistory.scrollHeight;
-        }
+      // Mensagem do usuário
+      const userDiv = document.createElement('div');
+      userDiv.className = 'bg-blue-100 text-gray-800 p-2 rounded mb-2';
+      userDiv.innerHTML = `<strong>Você:</strong> ${message}`;
+      chatHistory.appendChild(userDiv);
 
-        // Event Listeners
-        document.getElementById('send-btn').addEventListener('click', sendMessage);
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
+      // Mensagem do bot temporária
+      const botDiv = document.createElement('div');
+      botDiv.className = 'bg-gray-100 text-gray-800 p-2 rounded mb-2';
+      botDiv.innerHTML = '<strong>Assistente:</strong> ⌛ Processando...';
+      chatHistory.appendChild(botDiv);
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+
+      // Chamada ao backend
+      try {
+        const response = await fetch('/ia-agent/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
         });
-    </script>
+        const data = await response.json();
+        botDiv.innerHTML = `<strong>Assistente:</strong> ${data.response}`;
+      } catch (err) {
+        botDiv.innerHTML = `<strong>Erro:</strong> ${err.message}`;
+      }
+
+      userInput.value = '';
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+  </script>
 </body>
 </html>
