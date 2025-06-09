@@ -10,8 +10,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50 min-h-screen">
+
+  <div id="success-popup" class="fixed top-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-md" style="display: none; z-index: 1000;">
+    Transação salva com sucesso!
+  </div>
+
   <div class="flex flex-col min-h-screen">
-    <!-- Navbar -->
     <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
       <div class="container mx-auto px-4 py-3">
         <div class="flex justify-between items-center">
@@ -34,14 +38,11 @@
       </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="flex-grow container mx-auto px-4 py-8">
-      <!-- Page Header -->
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Gerenciar Transações</h2>
       </div>
 
-      <!-- Formulário de Transação -->
       <div class="bg-white rounded-lg shadow-md p-6 mb-6">
         <form id="transaction-form" action="{% url 'save_expense' %}" method="post">
           {% csrf_token %}
@@ -59,13 +60,11 @@
         </form>
       </div>
 
-      <!-- Tabela Embutida de Transações -->
       <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <iframe src="https://sheet2api.com/table/iHLaXYEkR9GG/db-orcamento/P%25C3%25A1gina3" width="100%" height="600" frameborder="0" style="border: 1px solid #dedede; background: transparent;"></iframe>
       </div>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-gray-800 text-white py-6">
       <div class="container mx-auto px-4 text-center">
         &copy; 2025 Gerenciador de Finanças

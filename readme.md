@@ -114,12 +114,6 @@ O assistente financeiro integra a API Google Gemini para fornecer:
 
 A funcionalidade RAG (Retrieval Augmented Generation) permite que o assistente forneça recomendações personalizadas com base no histórico financeiro do usuário.
 
-## 📝 Notas para Desenvolvimento
-
-- O projeto está configurado para funcionar com DEBUG=False, ajuste isso para desenvolvimento
-- A chave de API do Google Gemini é necessária para o funcionamento do assistente IA
-- A integração Sheet2API exige conexão com a internet
-
 ## 📱 Funcionalidades
 
 ### Página Inicial
@@ -136,15 +130,3 @@ A funcionalidade RAG (Retrieval Augmented Generation) permite que o assistente f
 - Interface de chat para conversar com o assistente
 - Recomendações de investimento baseadas no perfil financeiro
 - Sugestões para melhorar a saúde financeira
-
-## 📄 Licença
-
-Este projeto está licenciado sob a Licença MIT - veja o arquivo LICENSE.md para mais detalhes.
-
-## 👨‍💻 Como Contribuir
-
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
-3. Faça commit das suas alterações (`git commit -m 'Adiciona nova feature'`)
-4. Faça push para a branch (`git push origin feature/nova-feature`)
-5. Abra um Pull Request

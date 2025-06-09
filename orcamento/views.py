@@ -112,80 +112,6 @@ def save_expense(request):
 
     return JsonResponse({'message': 'Método não permitido'}, status=405)
 
-@csrf_exempt
-def delete_transaction(request):
-    if request.method == 'POST':
-        action = request.POST.get('action')
-        client = Sheet2APIClient(
-            api_url="https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%C3%A1gina3"
-        )
-        if action == 'add':
-            data = {
-                'Id': request.POST.get('Id'),
-                'Valor': request.POST.get('Valor'),
-                'Categoria': request.POST.get('Categoria'),
-                'Data': request.POST.get('Data'),
-                'Tipo': request.POST.get('Tipo')
-            }
-            try:
-                response = requests.post(
-                    "https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%C3%A1gina3",
-                    json=data,
-                    headers={"Content-Type": "application/json"}
-                )
-                response.raise_for_status()
-            except requests.RequestException as e:
-                logger.error(f"Erro ao adicionar transação: {str(e)}")
-        elif action == 'delete':
-            id_to_delete = request.POST.get('Id')
-            rows = client.get_rows()
-            for i, row in enumerate(rows):
-                if str(row.get('Id')) == str(id_to_delete):
-                    try:
-                        client.update_row(i + 2, {})
-                    except Exception as e:
-                        logger.error(f"Erro ao deletar transação: {str(e)}")
-                    break
-        return redirect('transacoes')
-    return redirect('transacoes')
-
-@csrf_exempt
-def manage_transaction(request):
-    if request.method == 'POST':
-        action = request.POST.get('action')
-        client = Sheet2APIClient(
-            api_url="https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%C3%A1gina3"
-        )
-        if action == 'add':
-            data = {
-                'Id': request.POST.get('Id'),
-                'Valor': request.POST.get('Valor'),
-                'Categoria': request.POST.get('Categoria'),
-                'Data': request.POST.get('Data'),
-                'Tipo': request.POST.get('Tipo')
-            }
-            try:
-                response = requests.post(
-                    "https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%C3%A1gina3",
-                    json=data,
-                    headers={"Content-Type": "application/json"}
-                )
-                response.raise_for_status()
-            except requests.RequestException as e:
-                logger.error(f"Erro ao adicionar transação: {str(e)}")
-        elif action == 'delete':
-            id_to_delete = request.POST.get('Id')
-            rows = client.get_rows()
-            for i, row in enumerate(rows):
-                if str(row.get('Id')) == str(id_to_delete):
-                    try:
-                        client.update_row(i + 1, {})
-                    except Exception as e:
-                        logger.error(f"Erro ao deletar transação: {str(e)}")
-                    break
-        return redirect('transacoes')
-    return redirect('transacoes')
-
 def calculate_financial_profile(rows):
     """Calcula o perfil financeiro do usuário com base nas transações."""
     saldo = 0
@@ -222,50 +148,30 @@ def ia_agent(request):
         try:
             data = json.loads(request.body)
             user_message = data.get('message', '')
-            
+
             if not user_message:
                 return JsonResponse({'error': 'Mensagem vazia'}, status=400)
-            
-            agent = GeminiAgent()
-            response = agent.get_investment_advice(user_message)
-            
-            return JsonResponse({'response': response})
-        
-        except Exception as e:
-            logger.error(f"Erro no agente IA: {str(e)}")
-            return JsonResponse({'error': 'Erro interno'}, status=500)
-    
-    return render(request, "ia_agent.html")    
-    
-@csrf_exempt
-def rag_advice(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            user_message = data.get('message', '')
-            
-            if not user_message:
-                return JsonResponse({'error': 'Mensagem vazia'}, status=400)
-            
-            # Recuperar transações
+
+            # Recuperar transações da planilha
             client = Sheet2APIClient(api_url="https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%C3%A1gina3")
             rows = client.get_rows()
-            
-            # Calcular perfil financeiro
+
+            # Calcular o perfil financeiro com base nos dados da planilha
             profile = calculate_financial_profile(rows)
-            
-            # Adicionar perfil ao agente
+
+            # Adicionar o perfil ao agente para dar contexto
             agent = GeminiAgent()
             agent.add_financial_profile(profile)
-            
-            # Recuperar contexto e gerar resposta
+
+            # Recuperar o contexto e gerar a resposta
             context = agent.retrieve_context(user_message)
             response = agent.get_investment_advice_with_context(user_message, context)
-            
+
             return JsonResponse({'response': response})
-        
+
         except Exception as e:
             logger.error(f"Erro no RAG advice: {str(e)}")
             return JsonResponse({'error': f"Erro interno: {str(e)}"}, status=500)
-    
-    return JsonResponse({'error': 'Método não permitido'}, status=405)    
+            
+    # O método GET continua renderizando a página de chat
+    return render(request, "ia_agent.html")
