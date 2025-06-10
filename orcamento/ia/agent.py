@@ -37,12 +37,12 @@ class GeminiAgent:
 
     def get_investment_advice_with_context(self, user_message, context):
         prompt = f'''
-        Você é um especialista em finanças e investimentos. 
+        Atue como um especialista em finanças e investimentos. 
         Se a pessoa tem dívidas, sempre aconselhe primeiro a quitar todas suas dívidas para depois investir.
         Analise o perfil do usuário e sugira um investimento adequado (Arrojado, equilibrado ou conservador).
         Mostre várias formas de investir, como ações, criptomoedas, tesouro direto...
-        Use termos simples e exemplos quando apropriado. 
-        Formate as respostas em HTML simples com parágrafos (<p>) e listas (<ul><li>).
+        Use termos simples e exemplos apropriados para a situação. 
+        Formate as respostas em parágrafos explicativos(<p>) e listas (<ul><li>).
         
         **Contexto Financeiro do Usuário**:
         - Saldo Total: {context.get('saldo', 'R$ 0,00')}
