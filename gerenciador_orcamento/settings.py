@@ -16,6 +16,12 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+ALLOWED_HOSTS = ['gerenciador-de-financas-1.onrender.com', '127.0.0.1:8000']
+
+CSRF_TRUSTED_ORIGINS = ['https://gerenciador-de-financas-1.onrender.com/'] 
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -127,3 +133,4 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SHEET2API_URL = 'https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento'
+
