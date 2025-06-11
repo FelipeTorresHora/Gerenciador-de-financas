@@ -5,16 +5,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Assistente IA - Gerenciador de Finanças</title>
-  <!-- Tailwind CSS -->
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <!-- Custom Styles -->
   <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50 min-h-screen">
   <div class="flex flex-col min-h-screen">
-    <!-- Navbar -->
     <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
       <div class="container mx-auto px-4 py-3">
         <div class="flex justify-between items-center">
@@ -39,11 +35,9 @@
       </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="flex-grow container mx-auto px-4 py-8">
       <h2 class="text-2xl font-bold text-gray-800 mb-4">Assistente Financeiro Inteligente</h2>
       <div id="chat-history" class="bg-white p-4 rounded-lg shadow h-96 overflow-y-auto mb-4">
-        <!-- Mensagens aparecerão aqui -->
       </div>
       <div class="flex">
         <input type="text" id="user-input" class="flex-grow rounded-md border border-gray-300 p-2 mr-2" placeholder="Digite sua pergunta sobre investimentos...">
@@ -51,7 +45,6 @@
       </div>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-gray-800 text-white py-6">
       <div class="container mx-auto px-4 text-center">
         &copy; 2025 Gerenciador de Finanças
@@ -59,15 +52,12 @@
     </footer>
   </div>
 
-  <!-- Scripts -->
   <script src="{% static 'js/scripts.js' %}"></script>
   <script>
-    // Mobile menu toggle
     const mobileBtn = document.getElementById('mobile-menu-button');
     const mobileMenu = document.getElementById('mobile-menu');
     if (mobileBtn) mobileBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
 
-    // Chat functionality
     const chatHistory = document.getElementById('chat-history');
     const userInput = document.getElementById('user-input');
     const sendBtn = document.getElementById('send-btn');
@@ -76,20 +66,17 @@
       const message = userInput.value.trim();
       if (!message) return;
 
-      // Mensagem do usuário
       const userDiv = document.createElement('div');
       userDiv.className = 'bg-blue-100 text-gray-800 p-2 rounded mb-2';
       userDiv.innerHTML = `<strong>Você:</strong> ${message}`;
       chatHistory.appendChild(userDiv);
 
-      // Mensagem do bot temporária
       const botDiv = document.createElement('div');
       botDiv.className = 'bg-gray-100 text-gray-800 p-2 rounded mb-2';
       botDiv.innerHTML = '<strong>Assistente:</strong> ⌛ Processando...';
       chatHistory.appendChild(botDiv);
       chatHistory.scrollTop = chatHistory.scrollHeight;
 
-      // Chamada ao backend
       try {
         const response = await fetch('/ia-agent/', {
           method: 'POST',

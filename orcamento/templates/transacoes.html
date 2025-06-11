@@ -11,10 +11,6 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-  <div id="success-popup" class="fixed top-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-md" style="display: none; z-index: 1000;">
-    Transação salva com sucesso!
-  </div>
-
   <div class="flex flex-col min-h-screen">
     <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
       <div class="container mx-auto px-4 py-3">
@@ -49,15 +45,17 @@
           {% csrf_token %}
           <input type="hidden" name="Id" id="id-input" value="">
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-            <input type="text" name="Valor" id="amount" placeholder="Valor (ex.: 100,00)" class="rounded-md border-gray-300 p-2" required>
-            <input type="text" name="Categoria" id="category" placeholder="Categoria" class="rounded-md border-gray-300 p-2" required>
-            <input type="date" name="Data" id="date" class="rounded-md border-gray-300 p-2" required>
-            <select name="Tipo" id="transaction-type" class="rounded-md border-gray-300 p-2">
+            <input type="text" name="Valor" id="amount" placeholder="Valor (ex.: 100,00)" class="rounded-md border-gray-300 p-2 border" required>
+            <input type="text" name="Categoria" id="category" placeholder="Categoria" class="rounded-md border-gray-300 p-2 border" required>
+            <input type="date" name="Data" id="date" class="rounded-md border-gray-300 p-2 border" required>
+            <select name="Tipo" id="transaction-type" class="rounded-md border-gray-300 p-2 border">
               <option value="Receita">Receita</option>
               <option value="Despesa">Despesa</option>
             </select>
           </div>
-          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">Salvar Transação</button>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+            <i class="fas fa-save mr-2"></i>Salvar Transação
+          </button>
         </form>
       </div>
 
