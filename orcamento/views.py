@@ -45,54 +45,56 @@ def transacoes(request):
         logger.error(f"Erro ao carregar transações: {str(e)}")
         return render(request, "transacoes.html", {"error": str(e)})
 
+
 @csrf_protect
 def save_expense(request):
     client = Sheet2APIClient(
         api_url="https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%C3%A1gina3"
     )
-    rows = client.get_rows()
-    max_id = 0
-    for row in rows:
-        try:
-            rid = int(row.get('Id', 0))
-            max_id = max(max_id, rid)
-        except (ValueError, TypeError):
-            continue
-
+    
     if request.method == 'GET':
-        return JsonResponse({'next_id': str(max_id + 1)})
+       
+        return redirect('/transacoes/')
 
     if request.method == 'POST':
         try:
-            if request.content_type == 'application/json':
-                data = json.loads(request.body)
-            else:
-                data = {
-                    'Valor': request.POST.get('Valor'),
-                    'Categoria': request.POST.get('Categoria'),
-                    'Data': request.POST.get('Data'),
-                    'Tipo': request.POST.get('Tipo'),
-                }
-            data['Id'] = str(max_id + 1)
+            
+            rows = client.get_rows()
+            max_id = 0
+            for row in rows:
+                try:
+                    rid = int(row.get('Id', 0))
+                    max_id = max(max_id, rid)
+                except (ValueError, TypeError):
+                    continue
+
+            
+            data = {
+                'Id': str(max_id + 1),
+                'Valor': request.POST.get('Valor'),
+                'Categoria': request.POST.get('Categoria'),
+                'Data': request.POST.get('Data'),
+                'Tipo': request.POST.get('Tipo'),
+            }
 
             # Validação dos campos
             for field in ['Valor', 'Categoria', 'Data', 'Tipo']:
                 if not data.get(field):
                     logger.error(f"Campo {field} ausente ou vazio")
-                    return JsonResponse({'message': f"Campo {field} é obrigatório"}, status=400)
+                    return redirect('/transacoes/') 
 
             # Formatar Valor como número
             try:
                 valor = float(data['Valor'].replace(',', '.').replace('R$', '').strip())
-                data['Valor'] = f"R$ {valor:,.2f}".replace('.', ',')  # Formato "R$ 100,00"
+                data['Valor'] = f"R$ {valor:,.2f}".replace('.', ',')  
             except (ValueError, AttributeError):
                 logger.error("Formato inválido para Valor")
-                return JsonResponse({'message': "Formato inválido para Valor"}, status=400)
+                return redirect('/transacoes/') 
 
-            # Logar payload para depuração
+           
             logger.info(f"Payload enviado ao Sheet2API: {data}")
 
-            # Criar a linha usando requisição HTTP direta
+            
             try:
                 response = requests.post(
                     "https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%C3%A1gina3",
@@ -103,14 +105,18 @@ def save_expense(request):
                 logger.info("Linha criada com sucesso")
             except requests.RequestException as e:
                 logger.error(f"Erro ao criar linha no Sheet2API: {str(e)}")
-                return JsonResponse({'message': f"Erro ao salvar na planilha: {str(e)}"}, status=500)
+                return redirect('/transacoes/') 
 
-            return JsonResponse({'message': 'Transação salva com sucesso!', 'next_id': data['Id']})
+            
+            return redirect('/transacoes/')
+
         except Exception as e:
             logger.error(f"Erro geral em save_expense: {str(e)}")
-            return JsonResponse({'message': f"Erro interno: {str(e)}"}, status=500)
+            return redirect('/transacoes/')
 
-    return JsonResponse({'message': 'Método não permitido'}, status=405)
+    
+    return redirect('/transacoes/')
+
 
 def calculate_financial_profile(rows):
     """Calcula o perfil financeiro do usuário com base nas transações."""
@@ -121,26 +127,43 @@ def calculate_financial_profile(rows):
     
     for row in rows:
         try:
-            valor = float(row['Valor'].replace('R$', '').replace(',', '.').strip())
-            if row['Tipo'] == 'Receita':
+
+            if not all(key in row for key in ["Valor", "Tipo", "Categoria"]):
+                continue
+
+            valor_str = row.get('Valor', '0').strip()
+
+            if not valor_str:
+                continue
+            
+            valor = float(valor_str.replace('R$', '').replace('.', '').replace(',', '.').strip())
+
+            tipo_transacao = row.get('Tipo', '').strip().lower()
+            
+            if tipo_transacao == 'receita':
                 receitas += valor
-            elif row['Tipo'] == 'Despesa':
+            elif tipo_transacao == 'despesa':
                 despesas += valor
-                categorias[row['Categoria']] = categorias.get(row['Categoria'], 0) + valor
-        except (ValueError, KeyError):
+                
+                categoria = row.get('Categoria', 'Outros').strip()
+                categorias[categoria] = categorias.get(categoria, 0) + valor
+
+        except (ValueError, KeyError, AttributeError) as e:
+            
+            logger.warning(f"Linha ignorada devido a erro de formato: {row}. Erro: {e}")
             continue
     
     saldo = receitas - despesas
-    economia = receitas * 0.1
-    top_categorias = [f"{cat} (R$ {val:.2f})" for cat, val in sorted(categorias.items(), key=lambda x: x[1], reverse=True)[:3]]
+    economia = saldo  
+    
+    top_categorias = [f"{cat} (R$ {val:,.2f})" for cat, val in sorted(categorias.items(), key=lambda x: x[1], reverse=True)[:3]]
     
     return {
-        'saldo': f"R$ {saldo:,.2f}".replace('.', ','),
-        'receitas': f"R$ {receitas:,.2f}".replace('.', ','),
-        'despesas': f"R$ {despesas:,.2f}".replace('.', ','),
-        'economia': f"R$ {economia:,.2f}".replace('.', ','),
-        'categorias': ', '.join(top_categorias)
-    }
+        'saldo': f"R$ {saldo:,.2f}",
+        'receitas': f"R$ {receitas:,.2f}",
+        'despesas': f"R$ {despesas:,.2f}",
+        'economia': f"R$ {economia:,.2f}",
+        'categorias': ', '.join(top_categorias).replace('.', ',') }
   
 @csrf_exempt
 def ia_agent(request):
@@ -152,18 +175,15 @@ def ia_agent(request):
             if not user_message:
                 return JsonResponse({'error': 'Mensagem vazia'}, status=400)
 
-            # Recuperar transações da planilha
             client = Sheet2APIClient(api_url="https://sheet2api.com/v1/iHLaXYEkR9GG/db-orcamento/P%C3%A1gina3")
             rows = client.get_rows()
 
-            # Calcular o perfil financeiro com base nos dados da planilha
             profile = calculate_financial_profile(rows)
 
-            # Adicionar o perfil ao agente para dar contexto
             agent = GeminiAgent()
             agent.add_financial_profile(profile)
 
-            # Recuperar o contexto e gerar a resposta
+            
             context = agent.retrieve_context(user_message)
             response = agent.get_investment_advice_with_context(user_message, context)
 
@@ -173,5 +193,5 @@ def ia_agent(request):
             logger.error(f"Erro no RAG advice: {str(e)}")
             return JsonResponse({'error': f"Erro interno: {str(e)}"}, status=500)
             
-    # O método GET continua renderizando a página de chat
+   
     return render(request, "ia_agent.html")

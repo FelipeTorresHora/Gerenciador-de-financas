@@ -62,5 +62,4 @@ class GeminiAgent:
             return f"<p>Erro ao consultar a API do Gemini: {str(e)}</p>"
 
     def get_investment_advice(self, user_message):
-        # Para compatibilidade com chamadas antigas
         return self.get_investment_advice_with_context(user_message, {})
